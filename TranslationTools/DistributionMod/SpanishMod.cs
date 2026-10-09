@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.IO.Compression;
 
 #if ONLINE
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.3.2","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.4.0","Saso")]
 #else
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.3.2","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.4.0","Saso")]
 #endif
 [assembly: MelonGame("TVGS","Schedule I")]
 
@@ -48,7 +48,7 @@ public sealed class SpanishMod : MelonMod
             using var decompressed=new GZipStream(resource,CompressionMode.Decompress);
             using var reader=new StreamReader(decompressed,System.Text.Encoding.UTF8);
             string parent=Path.Combine(MelonEnvironment.GameRootDirectory,"UserData","ScheduleISpanish");
-            try { phoneTextScale=DisplaySettings.Load(parent).PhoneTextScale; }
+            try { var display=DisplaySettings.Load(parent); phoneTextScale=display.PhoneTextScale; PhoneText.Enabled=display.UseSdfPhoneText; }
             catch(Exception ex) { LoggerInstance.Warning("display.json: "+ex.Message+" Using original phone text scale."); }
 #if ONLINE
             try { targetLanguage=LanguageSettings.Load(parent).TargetLanguage; }
@@ -78,6 +78,15 @@ public sealed class SpanishMod : MelonMod
             HookEnable(patcher,typeof(Text),nameof(EnableUGUI));
             HookEnable(patcher,typeof(TextMeshProUGUI),nameof(EnableTMP));
             HookEnable(patcher,typeof(TextMeshPro),nameof(EnableTMP));
+            if(PhoneText.Enabled)
+            {
+                try
+                {
+                    patcher.Patch(AccessTools.DeclaredMethod(typeof(Text),"OnPopulateMesh",new[]{typeof(VertexHelper)}),postfix:new HarmonyMethod(typeof(PhoneText).GetMethod(nameof(PhoneText.Populate),BindingFlags.Static|BindingFlags.NonPublic)));
+                    patcher.Patch(AccessTools.DeclaredMethod(typeof(Text),"OnDisable"),postfix:new HarmonyMethod(typeof(PhoneText).GetMethod(nameof(PhoneText.Disable),BindingFlags.Static|BindingFlags.NonPublic)));
+                }
+                catch(Exception ex) { PhoneText.Enabled=false; LoggerInstance.Warning("Phone SDF font disabled: "+ex.Message); }
+            }
             try
             {
                 var dialogueType=AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a=>a.GetName().Name=="Assembly-CSharp")?.GetType("Il2CppScheduleOne.UI.DialogueCanvas");
@@ -127,6 +136,7 @@ public sealed class SpanishMod : MelonMod
     private static void TextPrefix(object __instance,ref string __0)
     {
         if(engine==null || replacing || string.IsNullOrEmpty(__0)) return;
+        if(__instance is TMP_Text phoneMirror && PhoneText.IsMirror(phoneMirror)) return;
         if(dialogueTarget!=null && __instance is TMP_Text tmp && tmp.GetInstanceID()==dialogueTarget.GetInstanceID() && __0!=dialogueSource && __0!=dialogueTranslation) return;
         try { if(__instance is TMP_Text label) FitSaveSlot(label); string original=__0; __0=Render(original,engine.Translate(__0)); Capture(original,__0); Track(__instance,original,__0); }
         catch(Exception ex) { Warn(ex); }
@@ -152,6 +162,7 @@ public sealed class SpanishMod : MelonMod
         if(engine==null || replacing) return;
         try
         {
+            PhoneText.Prepare(__instance);
             string original=__instance.text, translated=Render(original,engine.Translate(original));
             Capture(original,translated);
             Track(__instance,original,translated);
@@ -165,6 +176,7 @@ public sealed class SpanishMod : MelonMod
     private static void EnableTMP(TMP_Text __instance)
     {
         if(engine==null || replacing) return;
+        if(PhoneText.IsMirror(__instance)) return;
         try
         {
             FitSaveSlot(__instance);
@@ -289,6 +301,7 @@ public sealed class SpanishMod : MelonMod
     {
         capture?.Dispose(); capture=null;
         dialogueTarget=null;
+        PhoneText.Clear();
 #if ONLINE
         online?.Dispose(); online=null; waiting.Clear();
 #endif

@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace ScheduleISpanish;
 
-public sealed record DisplaySettings(int PhoneTextScale=2)
+public sealed record DisplaySettings(int PhoneTextScale=2,bool UseSdfPhoneText=true)
 {
     public static DisplaySettings Load(string directory)
     {
