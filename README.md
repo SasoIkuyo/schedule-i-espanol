@@ -1,36 +1,47 @@
 # Schedule I Translate
 
-**Rama de código fuente / Source branch:** [instrucciones de compilación / build instructions](BUILD.md). Las DLL publicadas están en [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
+**Source branch:** [Build instructions](BUILD.md) | [Download compiled mod](https://github.com/SasoIkuyo/schedule-i-translate/releases)
 
-Traducción para **Schedule I (IL2CPP)**, con una versión offline en español y una versión online con idioma configurable.
+Traducción de **Schedule I (IL2CPP)**: español sin conexión o traducción automática a otros idiomas mientras juegas. Funciona con **MelonLoader**.
 
-[Descargar versiones](https://github.com/SasoIkuyo/schedule-i-translate/releases) · [Apoyar el desarrollo ☕](https://buymeacoffee.com/sasoikuyo)
+**[Descargar](https://github.com/SasoIkuyo/schedule-i-translate/releases)** · [Código fuente](https://github.com/SasoIkuyo/schedule-i-translate/tree/source) · [Reportar un problema](https://github.com/SasoIkuyo/schedule-i-translate/issues) · [Apoyar el proyecto ☕](https://buymeacoffee.com/sasoikuyo)
 
-> Las versiones actuales se publican como preliminares. Encuentra los paquetes en [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
+[Español](#español) · [English](#english) · [Historial de cambios / Changelog](#historial-de-cambios--changelog)
+
+> Las versiones actuales son preliminares. La traducción sigue en desarrollo y puede haber textos pendientes o ajustes visuales por corregir.
 
 ## Español
 
-### Requisitos y versiones
+### Elige una versión
 
-Referencias de compilación: 0.4.6f13 y 0.4.7f12. No es una restricción a esas versiones; la compatibilidad con otras actualizaciones debe comprobarse.
+| Versión | Qué ofrece | Conexión | Archivo |
+| --- | --- | --- | --- |
+| **Offline** | 11.757 entradas integradas en español | No necesita internet | `ScheduleISpanish.dll` |
+| **Online** | Diccionario español y traducción automática de textos nuevos; idioma configurable | Necesaria para traducir textos nuevos | `ScheduleTranslate.dll` |
 
-- **MelonLoader**, instalado y compatible con tu juego.
-- **Offline:** 11.757 entradas integradas en español; funciona sin consultas de red.
-- **Online:** el mismo diccionario español y traducción de textos nuevos mediante Google. Permite elegir otros idiomas y guarda una caché independiente para cada uno.
+En Online, los textos se traducen conforme aparecen en el juego. En español se aprovecha el diccionario integrado; los otros idiomas parten del texto inglés. Las traducciones obtenidas se guardan en una caché por idioma y se reutilizan en futuras partidas.
 
 ### Instalación
 
+Necesitas **Schedule I (IL2CPP)** y **MelonLoader** instalado. La compatibilidad con nuevas actualizaciones del juego debe comprobarse.
+
 1. Cierra el juego.
 2. Descarga **un solo ZIP**, Online u Offline, desde [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
-3. Retira los otros mods de traducción activos para evitar conflictos.
+3. Retira las otras DLL de traducción activas y la versión anterior de este mod.
 4. Extrae el ZIP y copia su carpeta `Mods` en la carpeta del juego, junto a `Schedule I.exe`.
 5. Inicia el juego normalmente.
 
-Online usa `Mods/ScheduleTranslate.dll` y Offline usa `Mods/ScheduleISpanish.dll`: instala solo una. Al actualizar, retira la DLL anterior; el antiguo prototipo se llamaba `ScheduleSpanishOffline.dll`. Si cargas las dos variantes actuales, Online se desactiva y se conserva Offline. No necesitas ejecutar scripts ni PowerShell. Los paquetes contienen únicamente la DLL del mod; MelonLoader se instala por separado.
+Instala **solo una variante**. Los ZIP contienen únicamente la DLL del mod; MelonLoader se instala por separado. No necesitas ejecutar scripts ni PowerShell.
 
-### Cambiar el idioma online
+**Al actualizar:** conserva `UserData/ScheduleISpanish` para mantener tus ajustes y traducciones guardadas. Si tienes el prototipo antiguo, retira también `ScheduleSpanishOffline.dll`.
 
-Inicia el juego una vez con la versión Online y ciérralo. Abre `UserData/ScheduleISpanish/language.json` con un editor de texto y cambia el código:
+### Configuración
+
+Los archivos de configuración se crean al iniciar el mod. Cierra el juego antes de editarlos y reinícialo para aplicar los cambios.
+
+#### Idioma de Online
+
+Edita `UserData/ScheduleISpanish/language.json`. Por ejemplo, para francés:
 
 ```json
 {
@@ -38,54 +49,88 @@ Inicia el juego una vez con la versión Online y ciérralo. Abre `UserData/Sched
 }
 ```
 
-| Código | Idioma |
-| --- | --- |
-| `es` | Español, predeterminado |
-| `fr` | Francés |
-| `de` | Alemán |
-| `pt` | Portugués |
-| `it` | Italiano |
-| `ja` | Japonés |
-| `ko` | Coreano |
-| `zh-CN` | Chino simplificado |
-| `en` | Inglés original, sin consultas de traducción |
+| Código | Idioma | Código | Idioma |
+| --- | --- | --- | --- |
+| `es` | Español, predeterminado | `it` | Italiano |
+| `fr` | Francés | `ja` | Japonés |
+| `de` | Alemán | `ko` | Coreano |
+| `pt` | Portugués | `zh-CN` | Chino simplificado |
+| `en` | Inglés original, sin consultas | | |
 
-Usa un código admitido por Google Translate y reinicia el juego después de modificarlo. Esta configuración solo afecta a Online.
+Estos son ejemplos de códigos admitidos por Google Translate. La selección de idioma solo afecta a Online. Cada idioma usa su propio archivo de caché, como `cache.fr.jsonl`, dentro de `UserData/ScheduleISpanish`.
 
-En español se usa el diccionario integrado. Los demás idiomas parten del texto inglés y se traducen de forma asíncrona conforme aparecen las etiquetas. Cada idioma conserva sus resultados en un archivo como `cache.fr.jsonl`, dentro de `UserData/ScheduleISpanish`. Los textos guardados se reutilizan entre partidas sin volver a consultarlos.
+#### Texto del teléfono
 
-### Conexión, rendimiento y limitaciones
+El mod utiliza una fuente existente del juego para mejorar la legibilidad y ajusta el espacio de los rótulos e importes. Si una etiqueta contiene caracteres que esa fuente no admite, conserva la fuente original.
 
-Online envía los textos encontrados a Google desde la conexión de cada jugador. El mod no incluye claves API, cuentas del autor ni un proyecto de facturación de Google Cloud. Google puede limitar o rechazar solicitudes; la disponibilidad del servicio no está garantizada.
+Para restaurar por completo el aspecto original del texto, edita `UserData/ScheduleISpanish/display.json`:
 
-Las consultas se procesan una por una, con cola limitada y caché persistente. Si falla la conexión, las traducciones locales siguen disponibles y los textos nuevos permanecen en inglés.
+```json
+{
+  "PhoneTextScale": 1,
+  "UseSdfPhoneText": false
+}
+```
 
-La traducción combina resultados automáticos y correcciones locales. **Todavía puede haber textos sin traducir**, especialmente frases dinámicas y texto dibujado en imágenes. Algunas fuentes del juego podrían no mostrar caracteres de ciertos idiomas. No se ha verificado la cobertura completa de cada idioma ni el funcionamiento en todas las versiones del juego o equipos.
+Los valores predeterminados son `PhoneTextScale: 2` y `UseSdfPhoneText: true`. No se aumenta la resolución de toda la escena ni se instalan fuentes externas. Las mejoras visuales todavía necesitan comprobación dentro del juego.
 
-### Informar de problemas
+### Cómo funciona Online
 
-Abre un [issue](https://github.com/SasoIkuyo/schedule-i-translate/issues) con la versión del juego, variante del mod, idioma elegido, una captura o el texto afectado y, si hay un cierre o error, `MelonLoader/Latest.log`. Revisa el registro antes de compartirlo y elimina datos personales que pueda contener.
+- Envía los textos nuevos a Google desde la conexión de cada jugador.
+- Procesa las consultas una por una, con una cola limitada, y guarda los resultados localmente.
+- Reutiliza las traducciones guardadas y excluye contadores FPS, versiones, importes aislados y horas aisladas de las consultas.
+- No incluye claves API, credenciales del autor ni un proyecto de facturación de Google Cloud.
 
-### Apoyar el desarrollo
+Google puede limitar o rechazar solicitudes. Si falla la conexión, las traducciones locales siguen disponibles y los textos nuevos pueden permanecer en inglés.
 
-Si te sirve el mod, puedes apoyar su desarrollo en [Buy Me a Coffee](https://buymeacoffee.com/sasoikuyo).
+### Cobertura y problemas conocidos
+
+La traducción combina resultados automáticos y correcciones de vocabulario según el contexto del juego. Todavía pueden quedar frases dinámicas o textos dentro de imágenes sin traducir. Algunas fuentes no incluyen los caracteres de ciertos idiomas.
+
+No se ha verificado la cobertura completa de todos los idiomas ni el funcionamiento en todas las versiones del juego o equipos. Los ajustes de distribución del teléfono y de las opciones de diálogo siguen pendientes de validación visual.
+
+### Reportar un problema
+
+Abre un [issue](https://github.com/SasoIkuyo/schedule-i-translate/issues) e incluye:
+
+- Versión del juego y variante del mod: Online u Offline.
+- Idioma elegido y captura o texto afectado.
+- `MelonLoader/Latest.log` si hay errores de carga o cierres. Revisa el registro y elimina datos personales antes de compartirlo.
+
+### Código fuente y apoyo
+
+El código y las pruebas están en la rama [source](https://github.com/SasoIkuyo/schedule-i-translate/tree/source). Las instrucciones para compilar están en [BUILD.md](https://github.com/SasoIkuyo/schedule-i-translate/blob/source/BUILD.md).
+
+Si te sirve la traducción, puedes apoyar su desarrollo en [Buy Me a Coffee](https://buymeacoffee.com/sasoikuyo).
 
 ## English
 
-### Requirements and installation
+Translation for **Schedule I (IL2CPP)** using **MelonLoader**, with offline Spanish and automatic translation into configurable languages while you play.
 
-Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader**, installed separately. Build references: 0.4.6f13 and 0.4.7f12; compatibility with other updates needs verification.
+### Choose a version
 
-1. Close the game and download **one ZIP** from [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
-2. Remove other active translation mods to avoid conflicts.
-3. Extract the ZIP and copy its `Mods` folder into the game directory, next to `Schedule I.exe`.
-4. Start the game normally. No scripts or PowerShell are needed.
+| Version | Features | Connection | File |
+| --- | --- | --- | --- |
+| **Offline** | 11,757 embedded Spanish entries | Not required | `ScheduleISpanish.dll` |
+| **Online** | Spanish dictionary, translation of new text and configurable target language | Required for new translations | `ScheduleTranslate.dll` |
 
-Online uses `Mods/ScheduleTranslate.dll`; Offline uses `Mods/ScheduleISpanish.dll`. Install only one and remove the previous translation DLL when updating (the old prototype was `ScheduleSpanishOffline.dll`). If both current variants are loaded, Online disables itself and Offline remains active. **Offline** provides 11,757 embedded Spanish entries without network requests. **Online** adds translation of new text and a configurable target language.
+Online translates labels as they appear. Spanish uses the embedded dictionary; other languages start from the English text. Results are saved in a separate cache for each language and reused across sessions.
 
-### Select a language
+### Installation and updates
 
-Launch Online once, close the game, then edit `UserData/ScheduleISpanish/language.json`:
+1. Install **MelonLoader** for your IL2CPP game installation.
+2. Close the game and download **one ZIP** from [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
+3. Remove other active translation DLLs and the previous version of this mod.
+4. Extract the ZIP and copy its `Mods` folder next to `Schedule I.exe`.
+5. Start the game normally.
+
+Install **only one variant**. Packages contain only the mod DLL; no scripts or PowerShell are needed. Keep `UserData/ScheduleISpanish` when updating to preserve settings and cached translations. Remove `ScheduleSpanishOffline.dll` if you used the old prototype. Compatibility with new game updates needs verification.
+
+### Configuration
+
+Launch the mod once to create its settings, then close the game before editing them. Restart to apply changes.
+
+**Online language:** edit `UserData/ScheduleISpanish/language.json`:
 
 ```json
 {
@@ -93,67 +138,37 @@ Launch Online once, close the game, then edit `UserData/ScheduleISpanish/languag
 }
 ```
 
-Examples: `es` Spanish (default), `fr` French, `de` German, `pt` Portuguese, `it` Italian, `ja` Japanese, `ko` Korean, `zh-CN` Simplified Chinese, or `en` for original English without translation requests. Use a language code supported by Google Translate and restart after changing it.
+Examples: `es` Spanish (default), `fr` French, `de` German, `pt` Portuguese, `it` Italian, `ja` Japanese, `ko` Korean, `zh-CN` Simplified Chinese, or `en` for original English without translation requests. Use a language code supported by Google Translate. Caches such as `cache.fr.jsonl` are stored in `UserData/ScheduleISpanish`.
 
-Spanish uses the embedded dictionary. Other languages translate encountered English labels asynchronously. Each language has a separate persistent cache, such as `cache.fr.jsonl`. Saved results are reused across sessions without another request.
+**Phone text:** the mod uses an existing game font and adjusts label spacing. Unsupported characters retain the original font. To restore the original appearance, edit `UserData/ScheduleISpanish/display.json`:
+
+```json
+{
+  "PhoneTextScale": 1,
+  "UseSdfPhoneText": false
+}
+```
+
+Defaults are `PhoneTextScale: 2` and `UseSdfPhoneText: true`. No external fonts or scene resolution changes are included. Visual results still need in-game checking.
 
 ### Network and coverage
 
-Online sends encountered text to Google using each player's connection. No API key, author account or Google Cloud billing project is embedded. Requests run one at a time with a bounded queue. The service may limit or reject requests. When requests fail, local translations remain available and new labels stay in English.
+Online sends new text to Google using each player's connection. Requests run one at a time with a bounded queue and persistent caching. FPS counters, version strings, standalone currency and clock values are excluded. No API keys, author credentials or Google Cloud billing project are embedded.
 
-Translations are automated with local corrections. Dynamic text and text inside images may remain untranslated. Game fonts may lack characters needed by some languages. Complete language coverage and compatibility with every game version or computer have not been verified.
+The service may limit or reject requests. Local translations remain available when the connection fails; new text may stay in English. Translations combine automatic results and contextual corrections. Dynamic text, text inside images and unsupported font characters remain possible gaps. Full language coverage, visual layout and compatibility with every game version or computer have not been verified.
 
-Report problems through [Issues](https://github.com/SasoIkuyo/schedule-i-translate/issues), including your game version, mod variant, language, affected text or screenshot, and `MelonLoader/Latest.log` for crashes. Remove personal information from logs before sharing them.
+### Reports, source and support
 
-[Support development on Buy Me a Coffee ☕](https://buymeacoffee.com/sasoikuyo)
+Report problems through [Issues](https://github.com/SasoIkuyo/schedule-i-translate/issues), including the game version, mod variant, language and affected text or screenshot. Attach `MelonLoader/Latest.log` for crashes or load errors, removing personal information first.
 
-## Código fuente / Source code
+Source and tests: [source branch](https://github.com/SasoIkuyo/schedule-i-translate/tree/source) · [Build instructions](https://github.com/SasoIkuyo/schedule-i-translate/blob/source/BUILD.md) · [Support development ☕](https://buymeacoffee.com/sasoikuyo)
 
-El código del mod y sus pruebas están en la rama [source](https://github.com/SasoIkuyo/schedule-i-translate/tree/source), con instrucciones de compilación.
+## Historial de cambios / Changelog
 
-The mod source and tests are available on the [source branch](https://github.com/SasoIkuyo/schedule-i-translate/tree/source), with build instructions.
-
-
-## Cambios 1.3.0 / Changes
-
-Traducción de bloques de misiones y diálogos con nombres de zonas variables. Se conservan nombres de personajes y variedades como Green Crack y Sour Diesel. Se corrigieron términos de cultivo, semillas de marihuana y mayúsculas iniciales de los artículos. El diccionario se actualizó con el inventario de 0.4.7f12.
-
-Para mejorar la legibilidad del teléfono se aumenta la densidad de rasterización del texto clásico de Unity en `AppsCanvas`, manteniendo su tamaño y distribución. La mejora todavía requiere comprobación visual dentro del juego. Puedes desactivarla cerrando el juego y cambiando `UserData/ScheduleISpanish/display.json` a:
-
-```json
-{"PhoneTextScale": 1}
-```
-
-El valor predeterminado es `2`. No se aumenta la resolución de toda la escena. Los archivos de configuración y caché permanecen en `UserData/ScheduleISpanish` para conservar los ajustes al actualizar.
-
-Version 1.3.0 adds mission block translation and dialogue templates with runtime region names. Character and strain names are preserved, cultivation vocabulary is corrected, and item labels start with capitals. The dictionary includes the 0.4.7f12 inventory.
-
-Phone text rasterization density is increased for legacy Unity labels in `AppsCanvas`, without resizing their layout or raising scene resolution. Visual results still need in-game checking. Set `PhoneTextScale` to `1` in `UserData/ScheduleISpanish/display.json` to disable it (`2` is the default). Settings and caches remain under `UserData/ScheduleISpanish` across upgrades.
-
-## Correcciones 1.3.1 / Fixes
-
-Se separaron los espacios de rótulos y valores en el menú de partidas, con ajuste de tamaño y recorte dentro de cada campo. Se añadieron fechas como Hoy y Ayer y rótulos más cortos. El tiempo restante admite etiquetas de color internas. Los mensajes dinámicos del teléfono admiten precios con formato y contraofertas, conservando cantidades, nombres y horarios. Se traduce la indicación Usar estación de envasado y otras indicaciones de uso de artículos conocidos. La distribución visual del menú requiere comprobación en el juego.
-
-Save-slot captions and values have separate bounds, with text fitting and ellipsis. Relative dates and shorter captions were added. Remaining time handles internal color tags. Phone templates support formatted prices and counteroffers while preserving quantities, names and meeting times. Known-item interaction prompts are translated. The menu layout still requires in-game visual checking.
-## Correcciones 1.3.2 / Fixes
-
-Online excluye contadores FPS, versiones, importes aislados y horas aisladas de las consultas. Las etiquetas visibles que llegan con la cola llena se conservan en una lista limitada y se reintentan; se descartan las referencias de etiquetas que ya cambiaron. Los fallos de red se notifican de forma limitada y se reintentan después de la espera existente. Las traducciones nuevas empiezan con mayúscula sin modificar etiquetas de formato.
-
-Los nombres conocidos con precio, incluidos los menús de patinetas, se traducen localmente conservando importes y colores. Se añadieron Hablar con…, el aviso de dormir y correcciones de las opciones de compra.
-
-Online excludes FPS counters, version strings, standalone currency and clock values from requests. Visible labels rejected by a full queue remain in a bounded retry list; stale label references are removed. Network failures produce limited diagnostics and retry after the existing cooldown. New translations capitalize their first visible letter without changing markup. Known item-and-price labels, NPC talk prompts and the bedtime restriction are translated locally.
-## Teléfono 1.4.0 / Phone readability
-
-El teléfono usa la fuente SDF existente en el juego, ajuste de texto y espacios separados para rótulos e importes en el pedido del proveedor. Los nombres largos de pseudoefedrina tienen una forma corta solo en el teléfono. Se corrigen «entrega oculta», «Pedir mercancía» y las horas de preparación. La comprobación visual dentro del juego está pendiente.
-
-Puedes restaurar la fuente original cerrando el juego y añadiendo `"UseSdfPhoneText": false` a `UserData/ScheduleISpanish/display.json`. El ajuste se activa por defecto, también con configuraciones anteriores. Si la fuente SDF no admite los caracteres, esa etiqueta conserva la fuente original. No se aumenta la resolución de la escena ni se incluyen fuentes externas.
-
-Phone labels use the game's existing SDF font and text fitting. Supplier order captions and amounts have separate bounds. Long pseudoephedrine names use phone-only display aliases; delivery vocabulary and preparation durations are corrected. In-game visual verification is pending. Set `"UseSdfPhoneText": false` in `UserData/ScheduleISpanish/display.json` to restore the original font. Labels containing unsupported characters retain their original font. No external fonts or scene resolution changes are included.
-
-
-## Diálogos 1.4.1 / Dialogue layout
-
-Las opciones y sus requisitos usan espacios separados dentro de cada fila, con ajuste de tamaño y elipsis para textos largos. Los avisos de regiones se acortan a «Desbloquea Docks», también si había una traducción antigua en caché. Se corrigen las mayúsculas de opciones como «Estoy estancado». Compilación y pruebas correctas; comprobación visual pendiente.
-
-Dialogue options and requirements have separate bounds, automatic text fitting and ellipsis. Region requirements use shorter Spanish wording even with old cached translations. Menu option capitalization is corrected. Builds and tests pass; in-game visual verification is pending.
-
+| Versión / Version | Cambios principales | Main changes |
+| --- | --- | --- |
+| [1.4.1](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.4.1) | Espacios separados para opciones y requisitos; avisos de región cortos y mayúsculas corregidas. | Separate option and requirement bounds; shorter region notices and corrected capitalization. |
+| [1.4.0](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.4.0) | Fuente del teléfono, ajuste de pedidos y vocabulario de entregas. | Phone font, supplier order fitting and delivery terminology. |
+| [1.3.2](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.3.2) | Filtro de FPS, reintentos de consultas y traducción de patinetas con precios. | FPS filtering, request retries and priced skateboard labels. |
+| [1.3.1](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.3.1) | Distribución del menú de partidas, tiempo restante y mensajes dinámicos del teléfono. | Save menu layout, remaining time and dynamic phone messages. |
+| [1.3.0](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.3.0) | Bloques de misiones, diálogos variables y correcciones de cultivo y nombres. | Mission blocks, variable dialogue and cultivation/name corrections. |
