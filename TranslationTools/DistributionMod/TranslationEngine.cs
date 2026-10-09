@@ -113,6 +113,8 @@ public sealed class TranslationEngine
     {
         if (string.IsNullOrEmpty(source) || source.Length>16000) return source ?? "";
         if (exact.TryGetValue(source,out var translated)) return translated;
+        // Curated requirement wording takes precedence over older online cache entries.
+        if(spanishGrammar && SpanishGrammar.TryRegionRequirement(source,out var requirement)) return cache.TryGetValue(source,out var cachedRequirement) && cachedRequirement==requirement ? cachedRequirement : Remember(source,requirement);
         if (learned.TryGetValue(source,out translated)) return translated;
         if (baseResults.Contains(source) || learnedResults.ContainsKey(source) || derivedResults.ContainsKey(source)) return source;
         if (cache.TryGetValue(source,out translated)) return translated;

@@ -25,6 +25,13 @@ TranslationEngine Load(string mode)
     return result;
 }
 var offline=Load("Offline"); var onlineEngine=Load("Online");
+Assert(offline.Translate("Can I interest you in a free sample?")=="¿Quieres una muestra gratis?","Short sample option");
+Assert(offline.Translate("I'm Stuck")=="Estoy estancado","Menu capitalization");
+Assert(offline.Translate("My vehicle is stuck")=="Mi vehículo está atascado","Vehicle menu capitalization");
+onlineEngine.AddLearned("'DOCKS' REGION MUST BE UNLOCKED","LA REGIÓN 'DOCKS' DEBE ESTAR DESBLOQUEADA");
+Assert(onlineEngine.Translate("'DOCKS' REGION MUST BE UNLOCKED")=="Desbloquea Docks","Old online requirement cache overrides curated wording");
+Assert(offline.Translate("'UPTOWN' REGION MUST BE UNLOCKED")=="Desbloquea Uptown","Dynamic region requirement");
+Assert(offline.ContainsOriginal("Desbloquea Uptown"),"Curated requirement sent online again");
 Assert(offline.EntryCount==onlineEngine.EntryCount,"Variants have different dictionaries");
 Assert(offline.Translate("Save game")=="Guardar partida","Save label");
 Assert(offline.Translate("We Need To Cook")=="Tenemos que cocinar","Quest title");
