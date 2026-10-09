@@ -33,6 +33,12 @@ Assert(offline.Translate("Green Crack Seed")=="Semilla de Green Crack","Strain n
 Assert(offline.Translate("Plastic Pot")=="Maceta de plástico","Pot confused with cookware");
 Assert(offline.Translate("Baggie")=="Bolsita" && offline.Translate("Acid")=="Ácido" && offline.Translate("Bed")=="Cama","Item capitalization");
 Assert(offline.Translate("Albert Hoover")=="Albert Hoover","NPC name changed");
+Assert(offline.Translate("Talk to Jeff")=="Hablar con Jeff","NPC interaction");
+Assert(offline.Translate("Can't sleep before 6:00 PM")=="No puedes dormir antes de las 6:00 PM","Bed time restriction");
+Assert(offline.Translate("Cheap Skateboard<color=#54E717> ($75)</color>")=="Patineta barata<color=#54E717> ($75)</color>","NPC skateboard option with price");
+Assert(offline.Translate("Golden Skateboard<color=#54E717> ($1,500)</color>")=="Patineta dorada<color=#54E717> ($1,500)</color>","Price with thousands separator changed");
+Assert(offline.Translate("I'd like to purchase something")=="Me gustaría comprar algo","Menu sentence case");
+Assert(TextFormatting.CapitalizeFirstVisible("<color=green>[1]</color> me gustaría comprar algo")=="<color=green>[1]</color> Me gustaría comprar algo","Casing changed markup or hotkey");
 Assert(offline.Translate("(1 day, 20 hours remaining)")=="(1 día, 20 horas restantes)","Remaining hours from screenshot");
 Assert(offline.Translate("(<color=#00FF00>1 day, 20 hours remaining</color>)")=="(<color=#00FF00>1 día, 20 horas restantes</color>)","Duration with internal color tag");
 Assert(offline.Translate("<color=green>(1 day, <b>20 hours</b> remaining)</color>")=="<color=green>(1 día, <b>20 horas</b> restantes)</color>","Duration nested rich text");
@@ -105,9 +111,12 @@ using(var failure=new OnlineTranslator(restarted,fixture,(text,token)=>throw new
 var block=new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
 using(var queue=new OnlineTranslator(restarted,fixture,(text,token)=>block.Task.WaitAsync(token)))
 {
+    for(int i=0;i<1000;i++) Assert(!queue.Request(i+" FPS"),"FPS counter consumed translation queue");
+    Assert(!queue.Request("v0.4.7f12") && !queue.Request("$191,7K"),"Version or currency queried");
     int accepted=0;
     for(int i=0;i<100;i++) if(queue.Request("Pending novel message "+i)) accepted++;
     Assert(accepted<=64,"Request queue is unbounded");
+    Assert(queue.IsEligible("Visible unknown menu option") && !queue.Request("Visible unknown menu option"),"Queue-full text must remain eligible for retry");
 }
 Console.WriteLine("Online: protected formatting, single request, disk reuse after restart, malformed-cache tolerance, failure cooldown and queue limit passed.");
 var defaults=LanguageSettings.Load(fixture);
@@ -147,6 +156,11 @@ if(args.Contains("--live"))
     var response=await Take(live);
     Assert(response.Translation!=null && response.Translation!=sample,"Google did not return a usable translation");
     Console.WriteLine("Live Google request passed: "+response.Translation);
+    const string richSample="Cheap Skateboard<color=#54E717> ($75)</color>";
+    Assert(live.Request(richSample),"Live rich-text request was not queued");
+    var richResponse=await Take(live);
+    Assert(richResponse.Translation!=null && richResponse.Translation!=richSample && richResponse.Translation.Contains("<color=#54E717>") && richResponse.Translation.Contains("$75"),"Google rich-text request failed: "+richResponse.Error);
+    Console.WriteLine("Live formatted-price request passed: "+richResponse.Translation);
     foreach(var file in Directory.GetFiles(Path.Combine(fixture,"live"))) File.Delete(file);
     Directory.Delete(Path.Combine(fixture,"live"));
 }

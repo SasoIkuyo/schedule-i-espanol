@@ -1,6 +1,6 @@
 # Compilar / Build
 
-Esta rama publica el código de la versión 1.3.1 y sus pruebas para facilitar su revisión. Los commits agrupan los componentes existentes por función; no representan fechas originales de desarrollo. Los archivos del juego y las dependencias de MelonLoader no se distribuyen aquí.
+Esta rama publica el código de la versión 1.3.2 y sus pruebas para facilitar su revisión. Los commits agrupan los componentes existentes por función; no representan fechas originales de desarrollo. Los archivos del juego y las dependencias de MelonLoader no se distribuyen aquí.
 
 ## Requisitos
 
@@ -26,6 +26,8 @@ Estos comandos son para quienes quieran compilar o revisar el código. Para inst
 | --- | --- |
 | `SpanishGrammar.cs` | Tiempo restante con etiquetas de formato internas |
 | `TranslationEngine.cs` | Diccionario, reglas, formatos numéricos y caché local limitada |
+| `TranslationFilter.cs` | Evita consultas de contadores y valores sin contenido lingüístico |
+| `TextFormatting.cs` | Mayúscula inicial conservando etiquetas y atajos |
 | `OnlineTranslator.cs` | URL de Google, cola, protección de formato y caché persistente por idioma |
 | `DisplaySettings.cs` | Densidad de rasterización del teléfono, reversible con `display.json` |
 | `LanguageSettings.cs` | Lectura y validación de `language.json` |
@@ -41,7 +43,7 @@ La URL usada actualmente no lleva clave API, credenciales ni identificador de pr
 
 ## English
 
-This branch publishes the source and tests for version 1.3.1. Commits group existing components by function, rather than representing their original development dates. Game files and MelonLoader dependencies are not bundled.
+This branch publishes the source and tests for version 1.3.2. Commits group existing components by function, rather than representing their original development dates. Game files and MelonLoader dependencies are not bundled.
 
 Install an SDK capable of building `net6.0` projects and generate MelonLoader's IL2CPP assemblies using your own game installation. Run the commands above from the repository root, replacing `GameRoot` with your game directory. Build both variants before running tests. Tests mock network requests; `-- --live` additionally contacts Google.
 
