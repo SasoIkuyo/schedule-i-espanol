@@ -23,6 +23,9 @@ public sealed class OnlineTranslator : IDisposable
     private int learnedCount;
     private const int QueueLimit=64,CacheLimit=10000;
     private static readonly Regex Tokens=new(@"<[^>]*>|\{[^{}]*\}|\$[0-9]+|\\[nrt]|%[sdif]",RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(20));
+    private static readonly Regex ProtectedNames=new(Tokens+@"|\b(?:Granddaddy Purple|Green Crack|Sour Diesel|OG Kush|Albert Hoover|Hyland Manor|Westville)\b",RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(20));
+    private static readonly Regex SpanishTerms=new(ProtectedNames+@"|\b(?:weed seeds|weed|methamphetamine|meth|cocaine)\b",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(20));
+    private static readonly Dictionary<string,string> Glossary=new(StringComparer.OrdinalIgnoreCase) { ["weed seeds"]="semillas de marihuana",["weed"]="marihuana",["methamphetamine"]="metanfetamina",["meth"]="metanfetamina",["cocaine"]="cocaína" };
     private readonly Func<string,CancellationToken,Task<string>>? transport;
 
     public OnlineTranslator(TranslationEngine engine,string directory,Func<string,CancellationToken,Task<string>>? transport=null,string targetLanguage="es")
@@ -32,7 +35,7 @@ public sealed class OnlineTranslator : IDisposable
         Directory.CreateDirectory(directory);
         cachePath=Path.Combine(directory,$"cache.{this.targetLanguage}.jsonl");
         client=new HttpClient { Timeout=TimeSpan.FromSeconds(15) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("ScheduleISpanish/1.1");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("ScheduleTranslate/1.3");
         if(File.Exists(cachePath))
         {
             try
@@ -98,7 +101,11 @@ public sealed class OnlineTranslator : IDisposable
     private async Task<string> Translate(string source,CancellationToken token)
     {
         var parts=new List<string>();
-        string protectedText=Tokens.Replace(source,m=> { parts.Add(m.Value); return $"ZXQ{parts.Count-1:0000}QXZ"; });
+        string protectedText=(targetLanguage=="es" ? SpanishTerms : ProtectedNames).Replace(source,m=> {
+            string value=m.Value;
+            if(targetLanguage=="es" && Glossary.TryGetValue(value,out var translated)) value=char.IsUpper(value[0]) ? char.ToUpperInvariant(translated[0])+translated[1..] : translated;
+            parts.Add(value); return $"ZXQ{parts.Count-1:0000}QXZ";
+        });
         string response;
         if(transport!=null) response=await transport(protectedText,token);
         else
