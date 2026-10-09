@@ -13,7 +13,8 @@ Assert(support.StartsWith(disclaimerSpanish) && support.Contains("¿Te sirve est
 Assert(SupportMessage.Append(disclaimerSource,support,"https://buymeacoffee.com/test-support")==support,"Support footer repeated");
 TranslationEngine Load(string mode)
 {
-    string path=Path.GetFullPath($"TranslationTools/DistributionMod/bin/{mode}/Release/net6.0/ScheduleISpanish.dll");
+    string file=mode=="Online" ? "ScheduleTranslate.dll" : "ScheduleISpanish.dll";
+    string path=Path.GetFullPath($"TranslationTools/DistributionMod/bin/{mode}/Release/net6.0/{file}");
     var assembly=Assembly.LoadFile(path);
     using var resource=assembly.GetManifestResourceStream("ScheduleISpanish.Dictionary.gz") ?? throw new Exception("Missing embedded dictionary");
     using var gzip=new GZipStream(resource,CompressionMode.Decompress);
@@ -27,6 +28,18 @@ var offline=Load("Offline"); var onlineEngine=Load("Online");
 Assert(offline.EntryCount==onlineEngine.EntryCount,"Variants have different dictionaries");
 Assert(offline.Translate("Save game")=="Guardar partida","Save label");
 Assert(offline.Translate("We Need To Cook")=="Tenemos que cocinar","Quest title");
+Assert(offline.Translate("Weed Seeds")=="Semillas de marihuana","Cannabis seeds context");
+Assert(offline.Translate("Green Crack Seed")=="Semilla de Green Crack","Strain name translated literally");
+Assert(offline.Translate("Plastic Pot")=="Maceta de plástico","Pot confused with cookware");
+Assert(offline.Translate("Baggie")=="Bolsita" && offline.Translate("Acid")=="Ácido" && offline.Translate("Bed")=="Cama","Item capitalization");
+Assert(offline.Translate("Albert Hoover")=="Albert Hoover","NPC name changed");
+string mission="Deal for the Benzies Family\n<color=#00FF00>(2 days, 9 hours remaining)</color>\n• (Optional) Message Thomas to call off the truce\n• Deliver 30x OG Kush to Hyland Manor";
+string translatedMission=offline.Translate(mission);
+Assert(translatedMission=="Traficar para la familia Benzies\n<color=#00FF00>(2 días, 9 horas restantes)</color>\n• (Opcional) Escribe a Thomas para poner fin a la tregua\n• Entrega 30 unidades de OG Kush en Hyland Manor","Combined mission block: "+translatedMission);
+Assert(offline.Translate("Hmm... Oscar seen one lying around somewhere in <color=blue>Westville</color> I think...")=="Mmm... Oscar vio uno por ahí, en <color=blue>Westville</color>, creo...","Runtime region placeholder");
+Assert(offline.Translate("(1 day, 1 hour remaining)")=="(1 día, 1 hora restantes)","Singular remaining time");
+Assert(offline.Translate("Deliver 18x Sour Diesel to Hyland Manor")=="Entrega 18 unidades de Sour Diesel en Hyland Manor","Dynamic delivery quantity or strain");
+Assert(offline.Translate(translatedMission)==translatedMission,"Translated mission queried again");
 Assert(offline.Translate("<color=#FFFF00>Save game</color>")=="<color=#FFFF00>Guardar partida</color>","Color wrapper");
 Assert(offline.Translate("7:08 AM Saturday")=="7:08 AM Sábado","Clock pattern");
 Assert(offline.ContainsOriginal("7:08 AM Sábado"),"Derived translated output is not recognized");
@@ -47,6 +60,9 @@ async Task<OnlineTranslator.Result> Take(OnlineTranslator translator)
 }
 string fixture=Path.Combine(Path.GetTempPath(),"ScheduleSpanishOnlineTests-"+Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(fixture);
+Assert(DisplaySettings.Load(fixture).PhoneTextScale==2,"Phone density default");
+File.WriteAllText(Path.Combine(fixture,"display.json"),"{\"PhoneTextScale\":1}");
+Assert(DisplaySettings.Load(fixture).PhoneTextScale==1,"Phone density cannot be disabled");
 int requests=0;
 string original="Novel label ZXQdemo <color=#FF0000>{0}</color>";
 using(var service=new OnlineTranslator(onlineEngine,fixture,(text,token)=> {
@@ -106,6 +122,12 @@ var germanEngine=new TranslationEngine();
 using(var german=new OnlineTranslator(germanEngine,fixture,(text,token)=>Task.FromResult("Spiel speichern"),targetLanguage:"de"))
     Assert(germanEngine.Translate("Save game")=="Save game","French cache leaked into German");
 Console.WriteLine("Language settings, identity preservation, cache isolation and restart reuse passed.");
+using(var glossary=new OnlineTranslator(new TranslationEngine(),fixture,(text,token)=>Task.FromResult(text),targetLanguage:"es"))
+{
+    Assert(glossary.Request("Buy weed seeds: Green Crack and Sour Diesel from Albert Hoover"),"Glossary request rejected");
+    Assert((await Take(glossary)).Translation=="Buy semillas de marihuana: Green Crack and Sour Diesel from Albert Hoover","Online glossary or proper names lost");
+}
+Console.WriteLine("Mission blocks, dynamic dialogue, contextual vocabulary, names, item case and phone setting passed.");
 if(args.Contains("--live"))
 {
     var liveEngine=new TranslationEngine();

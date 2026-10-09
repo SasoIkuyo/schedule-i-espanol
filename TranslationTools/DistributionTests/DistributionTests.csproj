@@ -2,6 +2,7 @@
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net6.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><CheckEolTargetFramework>false</CheckEolTargetFramework></PropertyGroup>
   <ItemGroup>
     <Compile Include="../DistributionMod/LanguageSettings.cs" Link="LanguageSettings.cs" />
+    <Compile Include="../DistributionMod/DisplaySettings.cs" Link="DisplaySettings.cs" />
     <Compile Include="../DistributionMod/TranslationEngine.cs" Link="TranslationEngine.cs" />
     <Compile Include="../DistributionMod/OnlineTranslator.cs" Link="OnlineTranslator.cs" />
     <Compile Include="../DistributionMod/SupportMessage.cs" Link="SupportMessage.cs" />
