@@ -10,10 +10,10 @@ Traducción para **Schedule I (IL2CPP)**, con una versión offline en español y
 
 ### Requisitos y versiones
 
-La versión 0.4.6f13 se usó como referencia de compilación. No es una restricción a esa versión; la compatibilidad con otras actualizaciones debe comprobarse.
+Referencias de compilación: 0.4.6f13 y 0.4.7f12. No es una restricción a esas versiones; la compatibilidad con otras actualizaciones debe comprobarse.
 
 - **MelonLoader 0.7.3**, instalado y compatible con tu juego.
-- **Offline:** 11.465 entradas integradas en español; funciona sin consultas de red.
+- **Offline:** 11.744 entradas integradas en español; funciona sin consultas de red.
 - **Online:** el mismo diccionario español y traducción de textos nuevos mediante Google. Permite elegir otros idiomas y guarda una caché independiente para cada uno.
 
 ### Instalación
@@ -24,7 +24,7 @@ La versión 0.4.6f13 se usó como referencia de compilación. No es una restricc
 4. Extrae el ZIP y copia su carpeta `Mods` en la carpeta del juego, junto a `Schedule I.exe`.
 5. Inicia el juego normalmente.
 
-Ambas variantes usan `Mods/ScheduleISpanish.dll`: instala solo una. No necesitas ejecutar scripts ni PowerShell. Los paquetes contienen únicamente la DLL del mod; MelonLoader se instala por separado.
+Online usa `Mods/ScheduleTranslate.dll` y Offline usa `Mods/ScheduleISpanish.dll`: instala solo una. Al actualizar, retira la DLL anterior; el antiguo prototipo se llamaba `ScheduleSpanishOffline.dll`. Si cargas las dos variantes actuales, Online se desactiva y se conserva Offline. No necesitas ejecutar scripts ni PowerShell. Los paquetes contienen únicamente la DLL del mod; MelonLoader se instala por separado.
 
 ### Cambiar el idioma online
 
@@ -72,14 +72,14 @@ Si te sirve el mod, puedes apoyar su desarrollo en [Buy Me a Coffee](https://buy
 
 ### Requirements and installation
 
-Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader 0.7.3**, installed separately. Version 0.4.6f13 was used as the build reference; compatibility with other updates needs verification.
+Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader 0.7.3**, installed separately. Build references: 0.4.6f13 and 0.4.7f12; compatibility with other updates needs verification.
 
 1. Close the game and download **one ZIP** from [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
 2. Remove other active translation mods to avoid conflicts.
 3. Extract the ZIP and copy its `Mods` folder into the game directory, next to `Schedule I.exe`.
 4. Start the game normally. No scripts or PowerShell are needed.
 
-Both variants use `Mods/ScheduleISpanish.dll`; install only one. **Offline** provides 11,465 embedded Spanish entries without network requests. **Online** adds translation of new text and a configurable target language.
+Online uses `Mods/ScheduleTranslate.dll`; Offline uses `Mods/ScheduleISpanish.dll`. Install only one and remove the previous translation DLL when updating (the old prototype was `ScheduleSpanishOffline.dll`). If both current variants are loaded, Online disables itself and Offline remains active. **Offline** provides 11,744 embedded Spanish entries without network requests. **Online** adds translation of new text and a configurable target language.
 
 ### Select a language
 
@@ -110,3 +110,20 @@ Report problems through [Issues](https://github.com/SasoIkuyo/schedule-i-transla
 El código del mod y sus pruebas están en la rama [source](https://github.com/SasoIkuyo/schedule-i-translate/tree/source), con instrucciones de compilación.
 
 The mod source and tests are available on the [source branch](https://github.com/SasoIkuyo/schedule-i-translate/tree/source), with build instructions.
+
+
+## Cambios 1.3.0 / Changes
+
+Traducción de bloques de misiones y diálogos con nombres de zonas variables. Se conservan nombres de personajes y variedades como Green Crack y Sour Diesel. Se corrigieron términos de cultivo, semillas de marihuana y mayúsculas iniciales de los artículos. El diccionario se actualizó con el inventario de 0.4.7f12.
+
+Para mejorar la legibilidad del teléfono se aumenta la densidad de rasterización del texto clásico de Unity en `AppsCanvas`, manteniendo su tamaño y distribución. La mejora todavía requiere comprobación visual dentro del juego. Puedes desactivarla cerrando el juego y cambiando `UserData/ScheduleISpanish/display.json` a:
+
+```json
+{"PhoneTextScale": 1}
+```
+
+El valor predeterminado es `2`. No se aumenta la resolución de toda la escena. Los archivos de configuración y caché permanecen en `UserData/ScheduleISpanish` para conservar los ajustes al actualizar.
+
+Version 1.3.0 adds mission block translation and dialogue templates with runtime region names. Character and strain names are preserved, cultivation vocabulary is corrected, and item labels start with capitals. The dictionary includes the 0.4.7f12 inventory.
+
+Phone text rasterization density is increased for legacy Unity labels in `AppsCanvas`, without resizing their layout or raising scene resolution. Visual results still need in-game checking. Set `PhoneTextScale` to `1` in `UserData/ScheduleISpanish/display.json` to disable it (`2` is the default). Settings and caches remain under `UserData/ScheduleISpanish` across upgrades.
