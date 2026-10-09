@@ -1,6 +1,6 @@
 # Compilar / Build
 
-Esta rama publica el código de la versión 1.2.0 y sus pruebas para facilitar su revisión. Los commits agrupan los componentes existentes por función; no representan fechas originales de desarrollo. Los archivos del juego y las dependencias de MelonLoader no se distribuyen aquí.
+Esta rama publica el código de la versión 1.3.0 y sus pruebas para facilitar su revisión. Los commits agrupan los componentes existentes por función; no representan fechas originales de desarrollo. Los archivos del juego y las dependencias de MelonLoader no se distribuyen aquí.
 
 ## Requisitos
 
@@ -26,6 +26,7 @@ Estos comandos son para quienes quieran compilar o revisar el código. Para inst
 | --- | --- |
 | `TranslationEngine.cs` | Diccionario, reglas, formatos numéricos y caché local limitada |
 | `OnlineTranslator.cs` | URL de Google, cola, protección de formato y caché persistente por idioma |
+| `DisplaySettings.cs` | Densidad de rasterización del teléfono, reversible con `display.json` |
 | `LanguageSettings.cs` | Lectura y validación de `language.json` |
 | `SpanishMod.cs` | Interceptación de etiquetas Unity/TMP mediante Harmony y MelonLoader |
 | `SupportMessage.cs` | Mensaje de apoyo y enlace del autor |
@@ -39,10 +40,12 @@ La URL usada actualmente no lleva clave API, credenciales ni identificador de pr
 
 ## English
 
-This branch publishes the source and tests for version 1.2.0. Commits group existing components by function, rather than representing their original development dates. Game files and MelonLoader dependencies are not bundled.
+This branch publishes the source and tests for version 1.3.0. Commits group existing components by function, rather than representing their original development dates. Game files and MelonLoader dependencies are not bundled.
 
 Install an SDK capable of building `net6.0` projects and generate MelonLoader's IL2CPP assemblies using your own game installation. Run the commands above from the repository root, replacing `GameRoot` with your game directory. Build both variants before running tests. Tests mock network requests; `-- --live` additionally contacts Google.
 
 `Dictionary.txt` is the readable counterpart of the embedded `Dictionary.txt.gz`; only the gzip is embedded. The dictionary contains automated translations and local corrections. No full game inventories or original game assets are included.
 
 Review `OnlineTranslator.cs` for the network endpoint, text sent, request limits and saved cache. The current endpoint uses no API key, owner credentials or Google Cloud project. Installing a release requires copying the DLL, with no scripts to run.
+
+Online genera `ScheduleTranslate.dll`; Offline genera `ScheduleISpanish.dll`. `SpanishCorrections.txt` permite revisar las correcciones editoriales incorporadas en el diccionario; no se carga como archivo externo durante el juego. La reconstrucción usa el recurso gzip integrado.
