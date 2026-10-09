@@ -14,7 +14,7 @@ Traducción para **Schedule I (IL2CPP)**, con una versión offline en español y
 
 Referencias de compilación: 0.4.6f13 y 0.4.7f12. No es una restricción a esas versiones; la compatibilidad con otras actualizaciones debe comprobarse.
 
-- **MelonLoader 0.7.3**, instalado y compatible con tu juego.
+- **MelonLoader**, instalado y compatible con tu juego.
 - **Offline:** 11.754 entradas integradas en español; funciona sin consultas de red.
 - **Online:** el mismo diccionario español y traducción de textos nuevos mediante Google. Permite elegir otros idiomas y guarda una caché independiente para cada uno.
 
@@ -74,7 +74,7 @@ Si te sirve el mod, puedes apoyar su desarrollo en [Buy Me a Coffee](https://buy
 
 ### Requirements and installation
 
-Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader 0.7.3**, installed separately. Build references: 0.4.6f13 and 0.4.7f12; compatibility with other updates needs verification.
+Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader**, installed separately. Build references: 0.4.6f13 and 0.4.7f12; compatibility with other updates needs verification.
 
 1. Close the game and download **one ZIP** from [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
 2. Remove other active translation mods to avoid conflicts.
