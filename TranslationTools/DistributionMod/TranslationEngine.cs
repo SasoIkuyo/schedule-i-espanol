@@ -21,6 +21,7 @@ public sealed class TranslationEngine
     private bool spanishGrammar;
     private static readonly Regex NumericTokens = new(@"<[^>]*>|\{[^{}]*\}|[0-9]+(?:[.,][0-9]+)?",RegexOptions.CultureInvariant);
     private static readonly Regex WrappedLabel = new(@"^(?<open>(?:<[^>]+>)+)(?<body>[^<>]+)(?<close>(?:</[^>]+>)+)$",RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(10));
+    private static readonly Regex PricedLabel=new(@"^(?<label>[^<>\r\n]+?)(?<suffix>(?:\s*<[^>]+>)*\s*\(\$[0-9][0-9,.]*\)(?:</[^>]+>)*)$",RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(10));
     private sealed record NumericEntry(string[] Parts);
     private sealed record DialogueTemplate(string Prefix,Regex Pattern,string Translation,string[] Tokens);
     private static readonly Regex DialogueTokens=new(@"<(?:NAME|REGION|PRODUCT|LOCATION|PRICE|AMOUNT|TIME|WINDOW_START|WINDOW_END|DEBT|PAYMENT|PROPERTY|BUSINESS|VEHICLE|QUALITY|CUT|DAILY_WAGE|SIGNING_FEE|SIGN_FEE|DUE_DAYS|DIG_PRICE|NPC_DESCRIPTION)>",RegexOptions.CultureInvariant);
@@ -116,6 +117,8 @@ public sealed class TranslationEngine
         if (baseResults.Contains(source) || learnedResults.ContainsKey(source) || derivedResults.ContainsKey(source)) return source;
         if (cache.TryGetValue(source,out translated)) return translated;
         if (normalized.TryGetValue(Normalize(source),out translated)) return Remember(source,translated);
+        var priced=PricedLabel.Match(source);
+        if(priced.Success && exact.TryGetValue(priced.Groups["label"].Value,out var pricedName)) return Remember(source,pricedName+priced.Groups["suffix"].Value);
         if(spanishGrammar && SpanishGrammar.TryDuration(source,out var duration)) return Remember(source,duration);
         if(spanishGrammar && source.StartsWith("Use ",StringComparison.Ordinal) && exact.TryGetValue(source[4..],out var item)) return Remember(source,"Usar "+item);
         if (source[0]=='<' && depth<4)
