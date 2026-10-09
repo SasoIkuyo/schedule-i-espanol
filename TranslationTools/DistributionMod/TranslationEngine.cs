@@ -18,6 +18,7 @@ public sealed class TranslationEngine
     private readonly HashSet<string> baseResults = new(StringComparer.Ordinal);
     private readonly Dictionary<string,int> derivedResults = new(StringComparer.Ordinal);
     private const int CacheLimit = 1024;
+    private bool spanishGrammar;
     private static readonly Regex NumericTokens = new(@"<[^>]*>|\{[^{}]*\}|[0-9]+(?:[.,][0-9]+)?",RegexOptions.CultureInvariant);
     private static readonly Regex WrappedLabel = new(@"^(?<open>(?:<[^>]+>)+)(?<body>[^<>]+)(?<close>(?:</[^>]+>)+)$",RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(10));
     private sealed record NumericEntry(string[] Parts);
@@ -36,6 +37,7 @@ public sealed class TranslationEngine
 
     public void Load(string directory)
     {
+        spanishGrammar=true;
         // Corrections are loaded last; identical keys replace earlier values.
         foreach (var file in Directory.GetFiles(directory,"*.txt").OrderBy(p => Path.GetFileName(p)=="LocalComplements.txt" ? 1 : 0))
         {
@@ -47,6 +49,7 @@ public sealed class TranslationEngine
 
     public void Load(TextReader reader,bool identitiesOnly=false)
     {
+        spanishGrammar=!identitiesOnly;
         ReadEntries(reader,identitiesOnly);
         BuildNumbers();
     }
@@ -88,7 +91,7 @@ public sealed class TranslationEngine
                 {
                     pattern.Append(Regex.Escape(key[offset..slot.Index]));
                     int index=tokens.IndexOf(slot.Value);
-                    if(index<0) { index=tokens.Count; tokens.Add(slot.Value); pattern.Append($"(?<P{index}>[^<>\\r\\n]{{1,200}}?)"); }
+                    if(index<0) { index=tokens.Count; tokens.Add(slot.Value); pattern.Append($"(?<P{index}>[^\\r\\n]{{1,600}}?)"); }
                     else pattern.Append($"\\k<P{index}>");
                     offset=slot.Index+slot.Length;
                 }
@@ -113,6 +116,8 @@ public sealed class TranslationEngine
         if (baseResults.Contains(source) || learnedResults.ContainsKey(source) || derivedResults.ContainsKey(source)) return source;
         if (cache.TryGetValue(source,out translated)) return translated;
         if (normalized.TryGetValue(Normalize(source),out translated)) return Remember(source,translated);
+        if(spanishGrammar && SpanishGrammar.TryDuration(source,out var duration)) return Remember(source,duration);
+        if(spanishGrammar && source.StartsWith("Use ",StringComparison.Ordinal) && exact.TryGetValue(source[4..],out var item)) return Remember(source,"Usar "+item);
         if (source[0]=='<' && depth<4)
         {
             try
@@ -156,7 +161,9 @@ public sealed class TranslationEngine
                 {
                     string captured=match.Groups[$"P{i}"].Value;
                     // Translate known item/region labels, preserving unknown names and amounts.
-                    result=result.Replace(template.Tokens[i],exact.GetValueOrDefault(captured,captured),StringComparison.Ordinal);
+                    string slot=template.Tokens[i];
+                    string value=slot is "<LOCATION>" or "<REGION>" or "<PRODUCT>" or "<PROPERTY>" or "<BUSINESS>" or "<VEHICLE>" or "<QUALITY>" ? exact.GetValueOrDefault(captured,captured) : captured;
+                    result=result.Replace(slot,value,StringComparison.Ordinal);
                 }
                 return Remember(source,result);
             }
