@@ -7,7 +7,7 @@ namespace ScheduleISpanish;
 
 public sealed class OnlineTranslator : IDisposable
 {
-    public record Result(string Source,string? Translation);
+    public record Result(string Source,string? Translation,string? Error=null);
     private record CacheEntry(string Source,string Translation);
     private readonly TranslationEngine engine;
     private readonly string cachePath;
@@ -46,7 +46,7 @@ public sealed class OnlineTranslator : IDisposable
                     try
                     {
                         var entry=JsonSerializer.Deserialize<CacheEntry>(line);
-                        if(entry?.Source!=null && entry.Translation!=null && !engine.ContainsOriginal(entry.Source) && Valid(entry.Source,entry.Translation) && engine.AddLearned(entry.Source,entry.Translation)) learnedCount++;
+                        if(entry?.Source!=null && entry.Translation!=null && !TranslationFilter.IsNonLinguistic(entry.Source) && !engine.ContainsOriginal(entry.Source) && Valid(entry.Source,entry.Translation) && engine.AddLearned(entry.Source,TextFormatting.CapitalizeFirstVisible(entry.Translation))) learnedCount++;
                     }
                     catch(Exception ex) when(ex is JsonException or RegexMatchTimeoutException) { }
                 }
@@ -56,9 +56,11 @@ public sealed class OnlineTranslator : IDisposable
         worker=Task.Run(Work);
     }
 
+    public bool IsEligible(string source) => !stopping.IsCancellationRequested && source.Length>=3 && source.Length<=2000 && source.Any(char.IsLetter) && !TranslationFilter.IsNonLinguistic(source) && !engine.ContainsOriginal(source) && learnedCount<CacheLimit;
+
     public bool Request(string source)
     {
-        if(stopping.IsCancellationRequested || source.Length<3 || source.Length>2000 || !source.Any(char.IsLetter) || engine.ContainsOriginal(source) || learnedCount>=CacheLimit) return false;
+        if(!IsEligible(source)) return false;
         if(pending.ContainsKey(source)) return true;
         if(cooldown.TryGetValue(source,out var until) && until>DateTime.UtcNow) return false;
         if(pending.Count>=QueueLimit || !pending.TryAdd(source,0)) return false;
@@ -78,18 +80,18 @@ public sealed class OnlineTranslator : IDisposable
                 if(!jobs.TryDequeue(out var source)) continue;
                 try
                 {
-                    string value=await Translate(source,token);
+                    string value=TextFormatting.CapitalizeFirstVisible(await Translate(source,token));
                     // Persist first: failed disk writes do not report a saved translation.
                     await File.AppendAllTextAsync(cachePath,JsonSerializer.Serialize(new CacheEntry(source,value))+"\n",System.Text.Encoding.UTF8,token);
                     if(engine.AddLearned(source,value)) Interlocked.Increment(ref learnedCount);
                     completed.Enqueue(new Result(source,value));
                 }
                 catch(OperationCanceledException) when(token.IsCancellationRequested) { break; }
-                catch
+                catch(Exception ex)
                 {
                     if(cooldown.Count>=128) cooldown.Clear();
                     cooldown[source]=DateTime.UtcNow.AddMinutes(2);
-                    completed.Enqueue(new Result(source,null));
+                    completed.Enqueue(new Result(source,null,ex.GetType().Name+": "+ex.Message));
                 }
                 finally { pending.TryRemove(source,out _); }
                 await Task.Delay(1200,token);
