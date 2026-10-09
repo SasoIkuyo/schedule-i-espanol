@@ -2,7 +2,7 @@
 
 Traducción para **Schedule I 0.4.6f13 (IL2CPP)**, con una versión offline en español y una versión online con idioma configurable.
 
-[Descargar versiones](https://github.com/SasoIkuyo/schedule-i-translate/releases/latest) · [Apoyar el desarrollo ☕](https://buymeacoffee.com/sasoikuyo)
+[Descargar versiones](https://github.com/SasoIkuyo/schedule-i-translate/releases) · [Apoyar el desarrollo ☕](https://buymeacoffee.com/sasoikuyo)
 
 > Las versiones actuales se publican como preliminares. Encuentra los paquetes en [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
 
