@@ -25,6 +25,15 @@ TranslationEngine Load(string mode)
     return result;
 }
 var offline=Load("Offline"); var onlineEngine=Load("Online");
+onlineEngine.AddLearned("Hustler I","Estafador yo");
+Assert(onlineEngine.Translate("Hustler I")=="Estafador I","Bad cached rank overrides Roman numeral");
+Assert(offline.Translate("Hustler II")=="Estafador II","Rank II changed");
+Assert(offline.Translate("Unlocks at Hustler III")=="Requiere Estafador III","Unlock rank requirement");
+foreach(string roman in new[]{"I","II","III","IV","V","VI","VII","VIII","IX","X"})
+foreach(string name in new[]{"Street Rat","Hoodlum","Peddler","Hustler","Bagman","Enforcer","Shot Caller","Block Boss","Underlord","Baron","Kingpin"})
+    Assert(offline.Translate(name+" "+roman).EndsWith(" "+roman,StringComparison.Ordinal),"Rank numeral changed: "+name+" "+roman);
+Assert(!RankLabels.NumeralsPreserved("Hustler I","Estafador yo"),"Invalid rank cache accepted");
+Assert(RankLabels.ProtectNumerals("I need a sample",_=>"TOKEN")=="I need a sample","English pronoun protected as a rank");
 Assert(offline.Translate("WAITING FOR BENJI COLEMAN")=="Esperando a BENJI COLEMAN","Waiting requirement/NPC name");
 Assert(offline.Translate("Select a destination")=="Selecciona un destino","Delivery destination prompt");
 Assert(offline.Translate("[Complete Deal]")=="[Completar venta]","Drug deal context");
@@ -105,6 +114,15 @@ Assert(DisplaySettings.Load(fixture).UseSdfPhoneText,"Upgrading old display sett
 File.WriteAllText(Path.Combine(fixture,"display.json"),"{\"PhoneTextScale\":1,\"UseSdfPhoneText\":false}");
 Assert(!DisplaySettings.Load(fixture).UseSdfPhoneText,"Phone font cannot be restored");
 int requests=0;
+using(var ranks=new OnlineTranslator(new TranslationEngine(),fixture,(text,token)=>Task.FromResult(text.Replace("Reached Hustler","Rang Escroc")),targetLanguage:"fr"))
+{
+    Assert(ranks.Request("Reached Hustler II"),"French rank not queued");
+    Assert((await Take(ranks)).Translation=="Rang Escroc II","Online rank numeral not protected");
+}
+File.AppendAllText(Path.Combine(fixture,"cache.fr.jsonl"),"{\"Source\":\"Hustler I\",\"Translation\":\"Escroc moi\"}\n");
+var invalidRankCache=new TranslationEngine();
+using(var ranks=new OnlineTranslator(invalidRankCache,fixture,(text,token)=>throw new Exception("No request expected"),targetLanguage:"fr"))
+    Assert(invalidRankCache.Translate("Hustler I")=="Hustler I","Invalid cached numeral was reused");
 string original="Novel label ZXQdemo <color=#FF0000>{0}</color>";
 using(var service=new OnlineTranslator(onlineEngine,fixture,(text,token)=> {
     Interlocked.Increment(ref requests); return Task.FromResult(text.Replace("Novel label","Etiqueta nueva"));
