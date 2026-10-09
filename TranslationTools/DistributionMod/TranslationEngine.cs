@@ -10,6 +10,7 @@ public sealed class TranslationEngine
     private readonly Dictionary<string,string> normalized = new(StringComparer.Ordinal);
     private readonly Dictionary<string,NumericEntry> numbers = new(StringComparer.Ordinal);
     private readonly List<(Regex pattern,string replacement)> rules = new();
+    private readonly List<DialogueTemplate> dialogueTemplates = new();
     private readonly Dictionary<string,string> cache = new(StringComparer.Ordinal);
     private readonly Queue<string> cacheOrder = new();
     private readonly ConcurrentDictionary<string,string> learned = new(StringComparer.Ordinal);
@@ -20,6 +21,8 @@ public sealed class TranslationEngine
     private static readonly Regex NumericTokens = new(@"<[^>]*>|\{[^{}]*\}|[0-9]+(?:[.,][0-9]+)?",RegexOptions.CultureInvariant);
     private static readonly Regex WrappedLabel = new(@"^(?<open>(?:<[^>]+>)+)(?<body>[^<>]+)(?<close>(?:</[^>]+>)+)$",RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(10));
     private sealed record NumericEntry(string[] Parts);
+    private sealed record DialogueTemplate(string Prefix,Regex Pattern,string Translation,string[] Tokens);
+    private static readonly Regex DialogueTokens=new(@"<(?:NAME|REGION|PRODUCT|LOCATION|PRICE|AMOUNT|TIME|WINDOW_START|WINDOW_END|DEBT|PAYMENT|PROPERTY|BUSINESS|VEHICLE|QUALITY|CUT|DAILY_WAGE|SIGNING_FEE|SIGN_FEE|DUE_DAYS|DIG_PRICE|NPC_DESCRIPTION)>",RegexOptions.CultureInvariant);
     public int EntryCount => exact.Count;
     public int RuleCount => rules.Count;
     public int NumericCount => numbers.Count;
@@ -76,6 +79,22 @@ public sealed class TranslationEngine
         foreach (var (key,value) in exact)
         {
             baseResults.Add(value);
+            var slots=DialogueTokens.Matches(key).Cast<Match>().ToArray();
+            if(slots.Length>0 && slots[0].Index>=4 && slots.All(m=>value.Contains(m.Value,StringComparison.Ordinal)))
+            {
+                var pattern=new StringBuilder("^"); int offset=0;
+                var tokens=new List<string>();
+                foreach(var slot in slots)
+                {
+                    pattern.Append(Regex.Escape(key[offset..slot.Index]));
+                    int index=tokens.IndexOf(slot.Value);
+                    if(index<0) { index=tokens.Count; tokens.Add(slot.Value); pattern.Append($"(?<P{index}>[^<>\\r\\n]{{1,200}}?)"); }
+                    else pattern.Append($"\\k<P{index}>");
+                    offset=slot.Index+slot.Length;
+                }
+                pattern.Append(Regex.Escape(key[offset..])).Append('$');
+                dialogueTemplates.Add(new(key[..slots[0].Index],new Regex(pattern.ToString(),RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(10)),value,tokens.ToArray()));
+            }
             string template=NumberKey(key,out var source);
             NumberKey(value,out var target);
             if (source.Count==0 || !source.SequenceEqual(target)) continue;
@@ -84,7 +103,9 @@ public sealed class TranslationEngine
         }
     }
 
-    public string Translate(string? source)
+    public string Translate(string? source) => Translate(source,0);
+
+    private string Translate(string? source,int depth)
     {
         if (string.IsNullOrEmpty(source) || source.Length>16000) return source ?? "";
         if (exact.TryGetValue(source,out var translated)) return translated;
@@ -92,13 +113,16 @@ public sealed class TranslationEngine
         if (baseResults.Contains(source) || learnedResults.ContainsKey(source) || derivedResults.ContainsKey(source)) return source;
         if (cache.TryGetValue(source,out translated)) return translated;
         if (normalized.TryGetValue(Normalize(source),out translated)) return Remember(source,translated);
-        if (source[0]=='<')
+        if (source[0]=='<' && depth<4)
         {
             try
             {
                 var wrapper=WrappedLabel.Match(source);
-                if(wrapper.Success && exact.TryGetValue(wrapper.Groups["body"].Value,out var body))
-                    return Remember(source,wrapper.Groups["open"].Value+body+wrapper.Groups["close"].Value);
+                if(wrapper.Success)
+                {
+                    string body=Translate(wrapper.Groups["body"].Value,depth+1);
+                    if(body!=wrapper.Groups["body"].Value) return Remember(source,wrapper.Groups["open"].Value+body+wrapper.Groups["close"].Value);
+                }
             }
             catch(RegexMatchTimeoutException) { }
         }
@@ -119,6 +143,38 @@ public sealed class TranslationEngine
                 if (pattern.IsMatch(source)) return Remember(source,pattern.Replace(source,replacement));
             }
             catch (RegexMatchTimeoutException) { }
+        }
+        foreach(var template in dialogueTemplates)
+        {
+            if(!source.StartsWith(template.Prefix,StringComparison.Ordinal)) continue;
+            try
+            {
+                var match=template.Pattern.Match(source);
+                if(!match.Success) continue;
+                string result=template.Translation;
+                for(int i=0;i<template.Tokens.Length;i++)
+                {
+                    string captured=match.Groups[$"P{i}"].Value;
+                    // Translate known item/region labels, preserving unknown names and amounts.
+                    result=result.Replace(template.Tokens[i],exact.GetValueOrDefault(captured,captured),StringComparison.Ordinal);
+                }
+                return Remember(source,result);
+            }
+            catch(RegexMatchTimeoutException) { }
+        }
+        if(depth<4)
+        {
+            if(source.Contains('\n'))
+            {
+                string lines=Regex.Replace(source,@"[^\r\n]+",m=>Translate(m.Value,depth+1));
+                if(lines!=source) return Remember(source,lines);
+            }
+            var bullet=Regex.Match(source,@"^(?<prefix>\s*[•·]\s*)(?<body>.+)$",RegexOptions.CultureInvariant,TimeSpan.FromMilliseconds(10));
+            if(bullet.Success)
+            {
+                string body=Translate(bullet.Groups["body"].Value,depth+1);
+                if(body!=bullet.Groups["body"].Value) return Remember(source,bullet.Groups["prefix"].Value+body);
+            }
         }
         return Remember(source,source);
     }
