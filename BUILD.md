@@ -1,6 +1,6 @@
 # Compilar / Build
 
-Esta rama publica el código de la versión 1.4.3 y sus pruebas para facilitar su revisión. Los commits agrupan los componentes existentes por función; no representan fechas originales de desarrollo. Los archivos del juego y las dependencias de MelonLoader no se distribuyen aquí.
+Esta rama publica el código de la versión 1.4.4 y sus pruebas para facilitar su revisión. Los commits agrupan los componentes existentes por función; no representan fechas originales de desarrollo. Los archivos del juego y las dependencias de MelonLoader no se distribuyen aquí.
 
 ## Requisitos
 
@@ -43,7 +43,7 @@ La URL usada actualmente no lleva clave API, credenciales ni identificador de pr
 
 ## English
 
-This branch publishes the source and tests for version 1.4.3. Commits group existing components by function, rather than representing their original development dates. Game files and MelonLoader dependencies are not bundled.
+This branch publishes the source and tests for version 1.4.4. Commits group existing components by function, rather than representing their original development dates. Game files and MelonLoader dependencies are not bundled.
 
 Install an SDK capable of building `net6.0` projects and generate MelonLoader's IL2CPP assemblies using your own game installation. Run the commands above from the repository root, replacing `GameRoot` with your game directory. Build both variants before running tests. Tests mock network requests; `-- --live` additionally contacts Google.
 
