@@ -1,5 +1,7 @@
 # Schedule I Translate
 
+**Rama de código fuente / Source branch:** [instrucciones de compilación / build instructions](BUILD.md). Las DLL publicadas están en [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
+
 Traducción para **Schedule I (IL2CPP)**, con una versión offline en español y una versión online con idioma configurable.
 
 [Descargar versiones](https://github.com/SasoIkuyo/schedule-i-translate/releases) · [Apoyar el desarrollo ☕](https://buymeacoffee.com/sasoikuyo)
