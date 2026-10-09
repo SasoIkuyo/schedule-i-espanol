@@ -25,6 +25,8 @@ TranslationEngine Load(string mode)
     return result;
 }
 var offline=Load("Offline"); var onlineEngine=Load("Online");
+Assert(offline.Translate("Counter-offer")=="Contraoferta" && offline.Translate("[Counter-offer]")=="[Contraoferta]","Phone counteroffer button/title");
+Assert(offline.Translate("Yep")=="Sí","Phone acceptance button");
 Assert(offline.Translate("Can I interest you in a free sample?")=="¿Quieres una muestra gratis?","Short sample option");
 Assert(offline.Translate("I'm Stuck")=="Estoy estancado","Menu capitalization");
 Assert(offline.Translate("My vehicle is stuck")=="Mi vehículo está atascado","Vehicle menu capitalization");

@@ -83,6 +83,9 @@ Offroad Skateboard=Patineta todoterreno
 Wicked sick my man, which board are you looking for?=¡Genial, amigo! ¿Qué patineta estás buscando?
 
 # Phone supplier orders: concise labels and contextual terminology.
+Counter-offer=Contraoferta
+[Counter-offer]=[Contraoferta]
+Yep=Sí
 Can I interest you in a free sample?=¿Quieres una muestra gratis?
 I'd like to browse your stock=Quiero ver tu mercancía.
 I'm stuck=Estoy estancado
