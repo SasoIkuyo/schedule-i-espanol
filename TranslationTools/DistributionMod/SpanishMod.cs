@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.IO.Compression;
 
 #if ONLINE
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.3.0","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.3.1","Saso")]
 #else
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.3.0","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.3.1","Saso")]
 #endif
 [assembly: MelonGame("TVGS","Schedule I")]
 
@@ -78,7 +78,7 @@ public sealed class SpanishMod : MelonMod
             HookEnable(patcher,typeof(TextMeshPro),nameof(EnableTMP));
             try
             {
-                var dialogueType=AccessTools.TypeByName("Il2CppScheduleOne.UI.DialogueCanvas");
+                var dialogueType=AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a=>a.GetName().Name=="Assembly-CSharp")?.GetType("Il2CppScheduleOne.UI.DialogueCanvas");
                 var rollout=dialogueType==null ? null : AccessTools.DeclaredMethod(dialogueType,"RolloutDialogue");
                 if(rollout!=null) patcher.Patch(rollout,prefix:new HarmonyMethod(typeof(SpanishMod).GetMethod(nameof(DialoguePrefix),BindingFlags.Static|BindingFlags.NonPublic)));
             }
@@ -126,7 +126,7 @@ public sealed class SpanishMod : MelonMod
     {
         if(engine==null || replacing || string.IsNullOrEmpty(__0)) return;
         if(dialogueTarget!=null && __instance is TMP_Text tmp && tmp.GetInstanceID()==dialogueTarget.GetInstanceID() && __0!=dialogueSource && __0!=dialogueTranslation) return;
-        try { string original=__0; __0=Render(original,engine.Translate(__0)); Capture(original,__0); Track(__instance,original,__0); }
+        try { if(__instance is TMP_Text label) FitSaveSlot(label); string original=__0; __0=Render(original,engine.Translate(__0)); Capture(original,__0); Track(__instance,original,__0); }
         catch(Exception ex) { Warn(ex); }
     }
 
@@ -165,6 +165,7 @@ public sealed class SpanishMod : MelonMod
         if(engine==null || replacing) return;
         try
         {
+            FitSaveSlot(__instance);
             string original=__instance.text, translated=Render(original,engine.Translate(original));
             Capture(original,translated);
             Track(__instance,original,translated);
@@ -173,6 +174,36 @@ public sealed class SpanishMod : MelonMod
         }
         catch(Exception ex) { Warn(ex); }
         finally { replacing=false; }
+    }
+
+    private static void FitSaveSlot(TMP_Text label)
+    {
+        var group=label.transform;
+        if(group.name=="Text") group=group.parent;
+        if(group==null || (group.name!="NetWorth" && group.name!="Created" && group.name!="LastPlayed") || group.parent==null || group.parent.name!="Info") return;
+        var caption=group.GetComponent<TextMeshProUGUI>();
+        var valueTransform=group.Find("Text");
+        var value=valueTransform==null ? null : valueTransform.GetComponent<TextMeshProUGUI>();
+        if(caption==null || value==null) return;
+        // Reserve separate spaces inside each pair's existing width.
+        float width=caption.rectTransform.rect.width;
+        if(width<=0) return;
+        float captionWidth=width*(58f/150f),valueStart=width*(64f/150f);
+        caption.margin=new UnityEngine.Vector4(0,0,width-captionWidth,0);
+        var rect=value.rectTransform;
+        rect.anchorMin=rect.anchorMax=new UnityEngine.Vector2(0,0.5f);
+        rect.pivot=new UnityEngine.Vector2(0,0.5f);
+        rect.anchoredPosition=new UnityEngine.Vector2(valueStart,0);
+        rect.sizeDelta=new UnityEngine.Vector2(width-valueStart,25);
+        value.margin=UnityEngine.Vector4.zero;
+        foreach(var text in new TMP_Text[]{caption,value})
+        {
+            text.enableWordWrapping=false;
+            text.enableAutoSizing=true;
+            text.fontSizeMin=8;
+            text.fontSizeMax=12;
+            text.overflowMode=TextOverflowModes.Ellipsis;
+        }
     }
 
     private static string Render(string original,string translated) => targetLanguage!="es" && targetLanguage!="en" && original==translated ? translated : SupportMessage.Append(original,translated,spanish:targetLanguage=="es");
