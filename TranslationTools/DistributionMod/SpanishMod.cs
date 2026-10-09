@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.IO.Compression;
 
 #if ONLINE
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.4.0","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.4.1","Saso")]
 #else
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.4.0","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.4.1","Saso")]
 #endif
 [assembly: MelonGame("TVGS","Schedule I")]
 
@@ -78,6 +78,8 @@ public sealed class SpanishMod : MelonMod
             HookEnable(patcher,typeof(Text),nameof(EnableUGUI));
             HookEnable(patcher,typeof(TextMeshProUGUI),nameof(EnableTMP));
             HookEnable(patcher,typeof(TextMeshPro),nameof(EnableTMP));
+            try { DialogueLayout.Install(patcher); }
+            catch(Exception ex) { LoggerInstance.Warning("Dialogue choice layout: "+ex.Message); }
             if(PhoneText.Enabled)
             {
                 try
@@ -138,7 +140,7 @@ public sealed class SpanishMod : MelonMod
         if(engine==null || replacing || string.IsNullOrEmpty(__0)) return;
         if(__instance is TMP_Text phoneMirror && PhoneText.IsMirror(phoneMirror)) return;
         if(dialogueTarget!=null && __instance is TMP_Text tmp && tmp.GetInstanceID()==dialogueTarget.GetInstanceID() && __0!=dialogueSource && __0!=dialogueTranslation) return;
-        try { if(__instance is TMP_Text label) FitSaveSlot(label); string original=__0; __0=Render(original,engine.Translate(__0)); Capture(original,__0); Track(__instance,original,__0); }
+        try { if(__instance is TMP_Text label) FitSaveSlot(label); string original=__0; __0=Render(original,engine.Translate(__0)); if(__instance is TMP_Text choice && DialogueLayout.IsChoice(choice) && (__0!=original || engine.ContainsOriginal(original))) __0=TextFormatting.CapitalizeFirstVisible(__0); Capture(original,__0); Track(__instance,original,__0); }
         catch(Exception ex) { Warn(ex); }
     }
 
@@ -181,6 +183,7 @@ public sealed class SpanishMod : MelonMod
         {
             FitSaveSlot(__instance);
             string original=__instance.text, translated=Render(original,engine.Translate(original));
+            if(DialogueLayout.IsChoice(__instance) && (translated!=original || engine.ContainsOriginal(original))) translated=TextFormatting.CapitalizeFirstVisible(translated);
             Capture(original,translated);
             Track(__instance,original,translated);
             if(original==translated) return;
