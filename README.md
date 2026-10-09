@@ -16,7 +16,7 @@ Traducción de **Schedule I (IL2CPP)**: español sin conexión o traducción aut
 
 | Versión | Qué ofrece | Conexión | Archivo |
 | --- | --- | --- | --- |
-| **Offline** | 11.757 entradas integradas en español | No necesita internet | `ScheduleISpanish.dll` |
+| **Offline** | 11.759 entradas integradas en español | No necesita internet | `ScheduleISpanish.dll` |
 | **Online** | Diccionario español y traducción automática de textos nuevos; idioma configurable | Necesaria para traducir textos nuevos | `ScheduleTranslate.dll` |
 
 En Online, los textos se traducen conforme aparecen en el juego. En español se aprovecha el diccionario integrado; los otros idiomas parten del texto inglés. Las traducciones obtenidas se guardan en una caché por idioma y se reutilizan en futuras partidas.
@@ -61,7 +61,7 @@ Estos son ejemplos de códigos admitidos por Google Translate. La selección de 
 
 #### Texto del teléfono
 
-El mod utiliza una fuente existente del juego para mejorar la legibilidad y ajusta el espacio de los rótulos e importes. Si una etiqueta contiene caracteres que esa fuente no admite, conserva la fuente original.
+El mod utiliza una fuente existente del juego para mejorar la legibilidad y ajusta el espacio de los rótulos e importes. Los campos editables y el menú de contraoferta conservan el texto nativo del juego. Si una etiqueta contiene caracteres que la fuente nueva no admite, conserva la fuente original.
 
 Para restaurar por completo el aspecto original del texto, edita `UserData/ScheduleISpanish/display.json`:
 
@@ -111,7 +111,7 @@ Translation for **Schedule I (IL2CPP)** using **MelonLoader**, with offline Span
 
 | Version | Features | Connection | File |
 | --- | --- | --- | --- |
-| **Offline** | 11,757 embedded Spanish entries | Not required | `ScheduleISpanish.dll` |
+| **Offline** | 11,759 embedded Spanish entries | Not required | `ScheduleISpanish.dll` |
 | **Online** | Spanish dictionary, translation of new text and configurable target language | Required for new translations | `ScheduleTranslate.dll` |
 
 Online translates labels as they appear. Spanish uses the embedded dictionary; other languages start from the English text. Results are saved in a separate cache for each language and reused across sessions.
@@ -140,7 +140,7 @@ Launch the mod once to create its settings, then close the game before editing t
 
 Examples: `es` Spanish (default), `fr` French, `de` German, `pt` Portuguese, `it` Italian, `ja` Japanese, `ko` Korean, `zh-CN` Simplified Chinese, or `en` for original English without translation requests. Use a language code supported by Google Translate. Caches such as `cache.fr.jsonl` are stored in `UserData/ScheduleISpanish`.
 
-**Phone text:** the mod uses an existing game font and adjusts label spacing. Unsupported characters retain the original font. To restore the original appearance, edit `UserData/ScheduleISpanish/display.json`:
+**Phone text:** the mod uses an existing game font and adjusts label spacing. Editable fields and the counteroffer menu retain native game text. Unsupported characters retain the original font. To restore the original appearance, edit `UserData/ScheduleISpanish/display.json`:
 
 ```json
 {
@@ -167,6 +167,7 @@ Source and tests: [source branch](https://github.com/SasoIkuyo/schedule-i-transl
 
 | Versión / Version | Cambios principales | Main changes |
 | --- | --- | --- |
+| [1.4.2](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.4.2) | Actualización de texto visual al cambiar valores; contraoferta y campos editables con texto nativo. Botones «Sí» y «Contraoferta». | Refresh phone mirrors when values change; native counteroffer and editable fields. Corrected Spanish buttons. |
 | [1.4.1](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.4.1) | Espacios separados para opciones y requisitos; avisos de región cortos y mayúsculas corregidas. | Separate option and requirement bounds; shorter region notices and corrected capitalization. |
 | [1.4.0](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.4.0) | Fuente del teléfono, ajuste de pedidos y vocabulario de entregas. | Phone font, supplier order fitting and delivery terminology. |
 | [1.3.2](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.3.2) | Filtro de FPS, reintentos de consultas y traducción de patinetas con precios. | FPS filtering, request retries and priced skateboard labels. |
