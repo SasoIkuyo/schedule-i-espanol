@@ -103,7 +103,8 @@ public sealed class OnlineTranslator : IDisposable
     private async Task<string> Translate(string source,CancellationToken token)
     {
         var parts=new List<string>();
-        string protectedText=(targetLanguage=="es" ? SpanishTerms : ProtectedNames).Replace(source,m=> {
+        string protectedText=RankLabels.ProtectNumerals(source,value=> { parts.Add(value); return $"ZXQ{parts.Count-1:0000}QXZ"; });
+        protectedText=(targetLanguage=="es" ? SpanishTerms : ProtectedNames).Replace(protectedText,m=> {
             string value=m.Value;
             if(targetLanguage=="es" && Glossary.TryGetValue(value,out var translated)) value=char.IsUpper(value[0]) ? char.ToUpperInvariant(translated[0])+translated[1..] : translated;
             parts.Add(value); return $"ZXQ{parts.Count-1:0000}QXZ";
@@ -133,6 +134,7 @@ public sealed class OnlineTranslator : IDisposable
     private static bool Valid(string source,string value)
     {
         return source.Length<=2000 && value.Length>0 && value.Length<=8000 &&
+            RankLabels.NumeralsPreserved(source,value) &&
             Tokens.Matches(source).Cast<Match>().Select(m=>m.Value).OrderBy(s=>s).SequenceEqual(Tokens.Matches(value).Cast<Match>().Select(m=>m.Value).OrderBy(s=>s));
     }
 

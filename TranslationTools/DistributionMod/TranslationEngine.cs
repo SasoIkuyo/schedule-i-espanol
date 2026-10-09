@@ -112,6 +112,7 @@ public sealed class TranslationEngine
     private string Translate(string? source,int depth)
     {
         if (string.IsNullOrEmpty(source) || source.Length>16000) return source ?? "";
+        if(spanishGrammar && RankLabels.TrySpanish(source,out var rank)) return cache.TryGetValue(source,out var cachedRank) && cachedRank==rank ? cachedRank : Remember(source,rank);
         if (exact.TryGetValue(source,out var translated)) return translated;
         // Curated requirement wording takes precedence over older online cache entries.
         if(spanishGrammar && SpanishGrammar.TryRegionRequirement(source,out var requirement)) return cache.TryGetValue(source,out var cachedRequirement) && cachedRequirement==requirement ? cachedRequirement : Remember(source,requirement);
