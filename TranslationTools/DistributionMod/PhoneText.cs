@@ -18,13 +18,15 @@ internal static class PhoneText
     {
         if(label.canvas==null || label.canvas.renderMode!=RenderMode.WorldSpace) return false;
         // Editable fields need the original glyph/caret geometry maintained by InputField.
-        if(label.GetComponentInParent<InputField>()!=null) return false;
+        if(label.GetComponentInParent<InputField>()!=null || label.GetComponentInParent<Dropdown>()!=null || label.GetComponentInParent<Dropdown.DropdownItem>()!=null) return false;
         var parent=label.transform;
         for(int i=0;i<20 && parent!=null;i++,parent=parent.parent)
         {
             // Keep the counteroffer's amount selectors and product preview native.
             // Their widths, editing and immediate refresh are controlled by the game.
             if(parent.name=="CounterofferInterface") return false;
+            // Dropdown instantiates its template under a detached Dropdown List canvas.
+            if(parent.name=="Dropdown List") return false;
             if(parent.name=="AppsCanvas") return true;
         }
         return false;
@@ -32,30 +34,46 @@ internal static class PhoneText
 
     internal static void Prepare(Text label)
     {
-        if(!Enabled || !label.isActiveAndEnabled || !IsPhone(label)) return;
+        if(!Enabled || !label.isActiveAndEnabled) return;
         try
         {
+            if(!IsPhone(label))
+            {
+                // A clone can move from a mirrored template into a native control.
+                var stale=label.transform.Find(ChildName);
+                if(stale!=null && stale.gameObject.activeSelf) { stale.gameObject.SetActive(false); label.SetVerticesDirty(); }
+                mirrors.Remove(label.GetInstanceID());
+                return;
+            }
             int id=label.GetInstanceID();
-            if(mirrors.TryGetValue(id,out var existing) && existing!=null) { existing.enabled=true; Sync(label,existing); return; }
+            if(mirrors.TryGetValue(id,out var existing) && existing!=null) { existing.gameObject.SetActive(true); existing.enabled=true; Sync(label,existing); return; }
             if(TMP_Settings.defaultFontAsset==null) return; // Original font remains visible.
             if(mirrors.Count>=512)
             {
                 foreach(var key in mirrors.Where(p=>p.Value==null).Select(p=>p.Key).ToArray()) mirrors.Remove(key);
                 if(mirrors.Count>=512) return;
             }
-            var child=new GameObject(ChildName);
-            child.layer=label.gameObject.layer;
-            child.transform.SetParent(label.transform,false);
-            var mirror=child.AddComponent<TextMeshProUGUI>();
+            // Unity clones children with their prefab. Reuse that visual child instead
+            // of leaving an old template label underneath a second mirror.
+            var inherited=label.transform.Find(ChildName);
+            var mirror=inherited==null ? null : inherited.GetComponent<TextMeshProUGUI>();
+            if(mirror==null)
+            {
+                var child=new GameObject(ChildName);
+                child.layer=label.gameObject.layer;
+                child.transform.SetParent(label.transform,false);
+                mirror=child.AddComponent<TextMeshProUGUI>();
+                // Rendering child must not participate in the parent's layout group.
+                child.AddComponent<LayoutElement>().ignoreLayout=true;
+            }
             mirror.font=TMP_Settings.defaultFontAsset;
             mirror.raycastTarget=false;
             mirror.maskable=label.maskable;
             mirror.rectTransform.anchorMin=Vector2.zero;
             mirror.rectTransform.anchorMax=Vector2.one;
             mirror.rectTransform.offsetMin=mirror.rectTransform.offsetMax=Vector2.zero;
-            // Rendering child must not participate in the parent's layout group.
-            child.AddComponent<LayoutElement>().ignoreLayout=true;
             mirrors[id]=mirror;
+            mirror.gameObject.SetActive(true);
             Sync(label,mirror);
         }
         catch(Exception ex) { if(errors++<3) MelonLoader.MelonLogger.Warning("Phone font fallback: "+ex.Message); }
