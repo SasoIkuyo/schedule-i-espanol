@@ -15,7 +15,7 @@ Traducción para **Schedule I (IL2CPP)**, con una versión offline en español y
 Referencias de compilación: 0.4.6f13 y 0.4.7f12. No es una restricción a esas versiones; la compatibilidad con otras actualizaciones debe comprobarse.
 
 - **MelonLoader**, instalado y compatible con tu juego.
-- **Offline:** 11.754 entradas integradas en español; funciona sin consultas de red.
+- **Offline:** 11.757 entradas integradas en español; funciona sin consultas de red.
 - **Online:** el mismo diccionario español y traducción de textos nuevos mediante Google. Permite elegir otros idiomas y guarda una caché independiente para cada uno.
 
 ### Instalación
@@ -81,7 +81,7 @@ Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader**, in
 3. Extract the ZIP and copy its `Mods` folder into the game directory, next to `Schedule I.exe`.
 4. Start the game normally. No scripts or PowerShell are needed.
 
-Online uses `Mods/ScheduleTranslate.dll`; Offline uses `Mods/ScheduleISpanish.dll`. Install only one and remove the previous translation DLL when updating (the old prototype was `ScheduleSpanishOffline.dll`). If both current variants are loaded, Online disables itself and Offline remains active. **Offline** provides 11,754 embedded Spanish entries without network requests. **Online** adds translation of new text and a configurable target language.
+Online uses `Mods/ScheduleTranslate.dll`; Offline uses `Mods/ScheduleISpanish.dll`. Install only one and remove the previous translation DLL when updating (the old prototype was `ScheduleSpanishOffline.dll`). If both current variants are loaded, Online disables itself and Offline remains active. **Offline** provides 11,757 embedded Spanish entries without network requests. **Online** adds translation of new text and a configurable target language.
 
 ### Select a language
 
@@ -149,4 +149,11 @@ El teléfono usa la fuente SDF existente en el juego, ajuste de texto y espacios
 Puedes restaurar la fuente original cerrando el juego y añadiendo `"UseSdfPhoneText": false` a `UserData/ScheduleISpanish/display.json`. El ajuste se activa por defecto, también con configuraciones anteriores. Si la fuente SDF no admite los caracteres, esa etiqueta conserva la fuente original. No se aumenta la resolución de la escena ni se incluyen fuentes externas.
 
 Phone labels use the game's existing SDF font and text fitting. Supplier order captions and amounts have separate bounds. Long pseudoephedrine names use phone-only display aliases; delivery vocabulary and preparation durations are corrected. In-game visual verification is pending. Set `"UseSdfPhoneText": false` in `UserData/ScheduleISpanish/display.json` to restore the original font. Labels containing unsupported characters retain their original font. No external fonts or scene resolution changes are included.
+
+
+## Diálogos 1.4.1 / Dialogue layout
+
+Las opciones y sus requisitos usan espacios separados dentro de cada fila, con ajuste de tamaño y elipsis para textos largos. Los avisos de regiones se acortan a «Desbloquea Docks», también si había una traducción antigua en caché. Se corrigen las mayúsculas de opciones como «Estoy estancado». Compilación y pruebas correctas; comprobación visual pendiente.
+
+Dialogue options and requirements have separate bounds, automatic text fitting and ellipsis. Region requirements use shorter Spanish wording even with old cached translations. Menu option capitalization is corrected. Builds and tests pass; in-game visual verification is pending.
 
