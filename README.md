@@ -13,7 +13,7 @@ Traducción para **Schedule I (IL2CPP)**, con una versión offline en español y
 Referencias de compilación: 0.4.6f13 y 0.4.7f12. No es una restricción a esas versiones; la compatibilidad con otras actualizaciones debe comprobarse.
 
 - **MelonLoader 0.7.3**, instalado y compatible con tu juego.
-- **Offline:** 11.744 entradas integradas en español; funciona sin consultas de red.
+- **Offline:** 11.750 entradas integradas en español; funciona sin consultas de red.
 - **Online:** el mismo diccionario español y traducción de textos nuevos mediante Google. Permite elegir otros idiomas y guarda una caché independiente para cada uno.
 
 ### Instalación
@@ -79,7 +79,7 @@ Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader 0.7.3
 3. Extract the ZIP and copy its `Mods` folder into the game directory, next to `Schedule I.exe`.
 4. Start the game normally. No scripts or PowerShell are needed.
 
-Online uses `Mods/ScheduleTranslate.dll`; Offline uses `Mods/ScheduleISpanish.dll`. Install only one and remove the previous translation DLL when updating (the old prototype was `ScheduleSpanishOffline.dll`). If both current variants are loaded, Online disables itself and Offline remains active. **Offline** provides 11,744 embedded Spanish entries without network requests. **Online** adds translation of new text and a configurable target language.
+Online uses `Mods/ScheduleTranslate.dll`; Offline uses `Mods/ScheduleISpanish.dll`. Install only one and remove the previous translation DLL when updating (the old prototype was `ScheduleSpanishOffline.dll`). If both current variants are loaded, Online disables itself and Offline remains active. **Offline** provides 11,750 embedded Spanish entries without network requests. **Online** adds translation of new text and a configurable target language.
 
 ### Select a language
 
@@ -127,3 +127,9 @@ El valor predeterminado es `2`. No se aumenta la resolución de toda la escena. 
 Version 1.3.0 adds mission block translation and dialogue templates with runtime region names. Character and strain names are preserved, cultivation vocabulary is corrected, and item labels start with capitals. The dictionary includes the 0.4.7f12 inventory.
 
 Phone text rasterization density is increased for legacy Unity labels in `AppsCanvas`, without resizing their layout or raising scene resolution. Visual results still need in-game checking. Set `PhoneTextScale` to `1` in `UserData/ScheduleISpanish/display.json` to disable it (`2` is the default). Settings and caches remain under `UserData/ScheduleISpanish` across upgrades.
+
+## Correcciones 1.3.1 / Fixes
+
+Se separaron los espacios de rótulos y valores en el menú de partidas, con ajuste de tamaño y recorte dentro de cada campo. Se añadieron fechas como Hoy y Ayer y rótulos más cortos. El tiempo restante admite etiquetas de color internas. Los mensajes dinámicos del teléfono admiten precios con formato y contraofertas, conservando cantidades, nombres y horarios. Se traduce la indicación Usar estación de envasado y otras indicaciones de uso de artículos conocidos. La distribución visual del menú requiere comprobación en el juego.
+
+Save-slot captions and values have separate bounds, with text fitting and ellipsis. Relative dates and shorter captions were added. Remaining time handles internal color tags. Phone templates support formatted prices and counteroffers while preserving quantities, names and meeting times. Known-item interaction prompts are translated. The menu layout still requires in-game visual checking.
