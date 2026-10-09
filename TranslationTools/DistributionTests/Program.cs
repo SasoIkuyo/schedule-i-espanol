@@ -45,6 +45,15 @@ Assert(offline.Translate("<color=green>(1 day, <b>20 hours</b> remaining)</color
 Assert(offline.Translate("Hey, I need 2x Granddaddy Purple. I'll pay <color=#46CB4F>$145</color>. Deal?")=="Oye, necesito 2x Granddaddy Purple. Te pago <color=#46CB4F>$145</color>. ¿Trato hecho?","Customer message with colored price");
 Assert(offline.Translate("How about 5x Granddaddy Purple for $455?")=="¿Qué tal 5 unidades de Granddaddy Purple por $455?","Phone counteroffer");
 string phoneMeeting=offline.Translate("Ok, I'll meet you in front of the motel between 6:00 PM and 12:00 AM.");
+Assert(offline.Translate("Request Dead Drop")=="Pedir mercancía","Supplier order title context");
+Assert(offline.Translate("Select items to order from Shirley")=="Elige qué pedirle a Shirley","Supplier subtitle/name");
+Assert(offline.Translate("Order Total")=="Total" && offline.Translate("Order Limit ")=="Máximo" && offline.Translate("Item Limit")=="Artículos","Compact phone order captions");
+Assert(offline.Translate("Got it. I'll let you know when it's ready. Should be about 4 hours")=="Entendido. Te avisaré cuando esté listo. Tiempo estimado: 4 horas","Supplier message duration");
+Assert(SpanishGrammar.TranslateTimeSpan("<b>1 hour</b>, 20 minutes")=="<b>1 hora</b>, 20 minutos","Formatted delivery duration");
+Assert(SpanishGrammar.TranslateTimeSpan("6:00 PM")=="6:00 PM","Meeting clock changed by duration helper");
+Assert(PhoneWording.Compact("Pseudoefedrina de baja calidad")=="Pseudo (baja calidad)","Phone product alias");
+Assert(PhoneWording.Compact("Se desbloquea en Hustler III")=="Requiere Hustler III","Phone rank alias");
+Assert(PhoneWording.Compact("Granddaddy Purple")=="Granddaddy Purple","Phone alias changes strain name");
 Assert(phoneMeeting=="Vale, nos vemos frente al motel entre las 6:00 PM y las 12:00 AM.","Phone meeting location/time: "+phoneMeeting);
 Assert(offline.Translate("Use Packaging Station")=="Usar estación de envasado","Packaging interaction prompt");
 Assert(offline.Translate("Use Mixing Station")=="Usar "+offline.Translate("Mixing Station"),"Other known-item interaction prompt");
@@ -77,8 +86,12 @@ async Task<OnlineTranslator.Result> Take(OnlineTranslator translator)
 string fixture=Path.Combine(Path.GetTempPath(),"ScheduleSpanishOnlineTests-"+Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(fixture);
 Assert(DisplaySettings.Load(fixture).PhoneTextScale==2,"Phone density default");
+Assert(DisplaySettings.Load(fixture).UseSdfPhoneText,"SDF phone font default");
 File.WriteAllText(Path.Combine(fixture,"display.json"),"{\"PhoneTextScale\":1}");
 Assert(DisplaySettings.Load(fixture).PhoneTextScale==1,"Phone density cannot be disabled");
+Assert(DisplaySettings.Load(fixture).UseSdfPhoneText,"Upgrading old display settings disables new font");
+File.WriteAllText(Path.Combine(fixture,"display.json"),"{\"PhoneTextScale\":1,\"UseSdfPhoneText\":false}");
+Assert(!DisplaySettings.Load(fixture).UseSdfPhoneText,"Phone font cannot be restored");
 int requests=0;
 string original="Novel label ZXQdemo <color=#FF0000>{0}</color>";
 using(var service=new OnlineTranslator(onlineEngine,fixture,(text,token)=> {
