@@ -166,6 +166,7 @@ public sealed class TranslationEngine
                     // Translate known item/region labels, preserving unknown names and amounts.
                     string slot=template.Tokens[i];
                     string value=slot is "<LOCATION>" or "<REGION>" or "<PRODUCT>" or "<PROPERTY>" or "<BUSINESS>" or "<VEHICLE>" or "<QUALITY>" ? exact.GetValueOrDefault(captured,captured) : captured;
+                    if(spanishGrammar && slot=="<TIME>") value=SpanishGrammar.TranslateTimeSpan(value);
                     result=result.Replace(slot,value,StringComparison.Ordinal);
                 }
                 return Remember(source,result);
