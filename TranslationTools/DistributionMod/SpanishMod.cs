@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.IO.Compression;
 
 #if ONLINE
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.3.1","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.3.2","Saso")]
 #else
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.3.1","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.3.2","Saso")]
 #endif
 [assembly: MelonGame("TVGS","Schedule I")]
 
@@ -30,6 +30,8 @@ public sealed class SpanishMod : MelonMod
 #if ONLINE
     private static OnlineTranslator? online;
     private static readonly Dictionary<string,List<object>> waiting=new(StringComparer.Ordinal);
+    private static DateTime nextRetry;
+    private static int networkErrors;
 #endif
     public override void OnInitializeMelon()
     {
@@ -215,7 +217,7 @@ public sealed class SpanishMod : MelonMod
 
     private static void Capture(string original,string translated)
     {
-        if(capture==null || engine==null || original!=translated || engine.ContainsOriginal(original) || missing.Count>=2048) return;
+        if(capture==null || engine==null || original!=translated || TranslationFilter.IsNonLinguistic(original) || engine.ContainsOriginal(original) || missing.Count>=2048) return;
         if(original.Length>=3 && original.Any(char.IsLetter) && missing.Add(original))
             capture.WriteLine(JsonSerializer.Serialize(original));
     }
@@ -223,9 +225,15 @@ public sealed class SpanishMod : MelonMod
     private static void Track(object target,string original,string translated)
     {
 #if ONLINE
-        if(original!=translated || SupportMessage.IsSupportMessage(original) || online==null || !online.Request(original)) return;
-        if(!waiting.TryGetValue(original,out var targets)) waiting[original]=targets=new List<object>();
+        if(original!=translated || SupportMessage.IsSupportMessage(original) || online==null || !online.IsEligible(original)) return;
+        if(target is TMP_Text tmp && !tmp.isActiveAndEnabled || target is Text text && !text.isActiveAndEnabled) return;
+        if(!waiting.TryGetValue(original,out var targets))
+        {
+            if(waiting.Count>=128) return;
+            waiting[original]=targets=new List<object>();
+        }
         if(targets.Count<4 && !targets.Contains(target)) targets.Add(target);
+        online.Request(original);
 #endif
     }
 
@@ -233,9 +241,25 @@ public sealed class SpanishMod : MelonMod
     public override void OnUpdate()
     {
         if(online==null) return;
+        if(DateTime.UtcNow>=nextRetry)
+        {
+            nextRetry=DateTime.UtcNow.AddMilliseconds(500);
+            foreach(var entry in waiting.ToArray())
+            {
+                entry.Value.RemoveAll(target=>!StillWaiting(target,entry.Key));
+                if(entry.Value.Count==0) { waiting.Remove(entry.Key); continue; }
+                online.Request(entry.Key);
+            }
+        }
         for(int i=0;i<8 && online.TryTake(out var result);i++)
         {
-            if(result==null || !waiting.Remove(result.Source,out var targets) || result.Translation==null) continue;
+            if(result==null || !waiting.TryGetValue(result.Source,out var targets)) continue;
+            if(result.Translation==null)
+            {
+                if(networkErrors++<3) LoggerInstance.Warning("Online translation failed; retry after cooldown. "+result.Error);
+                continue;
+            }
+            waiting.Remove(result.Source);
             foreach(var target in targets)
             {
                 try
@@ -248,6 +272,16 @@ public sealed class SpanishMod : MelonMod
                 finally { replacing=false; }
             }
         }
+    }
+
+    private static bool StillWaiting(object target,string source)
+    {
+        try
+        {
+            if(target is TMP_Text tmp) return tmp.isActiveAndEnabled && (tmp.text==source || (dialogueTarget!=null && tmp.GetInstanceID()==dialogueTarget.GetInstanceID() && dialogueSource==source));
+            return target is Text text && text.isActiveAndEnabled && text.text==source;
+        }
+        catch { return false; }
     }
 #endif
 
