@@ -3,6 +3,72 @@ using System.IO.Compression;
 using System.Reflection;
 
 void Assert(bool condition,string message) { if(!condition) throw new Exception(message); }
+if(args.Contains("--embed-spanish-cache"))
+{
+    string dictionary="TranslationTools/DistributionMod/Dictionary.txt.gz";
+    string cacheDirectory="UserData/ScheduleISpanish";
+    byte[] dictionaryBytes=File.ReadAllBytes(dictionary);
+    string payload;
+    using(var input=new MemoryStream(dictionaryBytes))
+    using(var gzip=new GZipStream(input,CompressionMode.Decompress))
+    using(var reader=new StreamReader(gzip)) payload=reader.ReadToEnd();
+    var engine=new TranslationEngine(); engine.Load(new StringReader(payload));
+    var rows=new List<(string Source,string Translation)>();
+    foreach(string line in File.ReadLines(Path.Combine(cacheDirectory,"cache.es.jsonl")))
+    {
+        try
+        {
+            using var doc=System.Text.Json.JsonDocument.Parse(line);
+            string source=doc.RootElement.GetProperty("Source").GetString()!;
+            string translation=doc.RootElement.GetProperty("Translation").GetString()!;
+            if(source!=null && translation!=null && !engine.ContainsOriginal(source) && engine.Translate(source)==source) rows.Add((source,translation));
+        }
+        catch(System.Text.Json.JsonException) { }
+    }
+    using(var translator=new OnlineTranslator(engine,cacheDirectory))
+    {
+        string Encode(string text)=>text.Replace("\\","\\\\").Replace("\n","\\n").Replace("\r","\\r").Replace("\t","\\t").Replace("=","\\=");
+        var added=new Dictionary<string,string>(StringComparer.Ordinal);
+        foreach(var row in rows)
+        {
+            if(row.Source.StartsWith('#') || row.Source.StartsWith("r:") || row.Source.StartsWith("sr:") || !engine.ContainsOriginal(row.Source)) continue;
+            string value=engine.Translate(row.Source);
+            if(value==row.Source || TranslationFilter.IsNonLinguistic(row.Source)) continue;
+            added.TryAdd(row.Source,value);
+        }
+        string merged=payload.TrimEnd('\r','\n')+"\n"+string.Join("\n",added.OrderBy(p=>p.Key,StringComparer.Ordinal).Select(p=>Encode(p.Key)+"="+Encode(p.Value)))+"\n";
+        var verification=new TranslationEngine(); verification.Load(new StringReader(merged));
+        foreach(var entry in added) Assert(verification.ContainsOriginal(entry.Key),"Embedded cache key lost: "+entry.Key);
+        string backup=Path.Combine("TranslationBackups","offline-cache-"+DateTime.Now.ToString("yyyyMMdd-HHmmss"));
+        Directory.CreateDirectory(backup); File.WriteAllBytes(Path.Combine(backup,"Dictionary.txt.gz"),dictionaryBytes);
+        using(var output=File.Create(dictionary))
+        using(var gzip=new GZipStream(output,CompressionLevel.Optimal))
+        using(var writer=new StreamWriter(gzip,new System.Text.UTF8Encoding(false))) writer.Write(merged);
+        File.WriteAllText("TranslationTools/offline-cache-merge.json",System.Text.Json.JsonSerializer.Serialize(new { Added=added.Count,Total=verification.EntryCount,Entries=added },new System.Text.Json.JsonSerializerOptions {WriteIndented=true}));
+        Console.WriteLine($"Embedded {added.Count} validated Spanish cache translations. Total: {verification.EntryCount}. Backup: {backup}");
+    }
+    return;
+}
+string releases="\n[{\"draft\":false,\"prerelease\":true,\"tag_name\":\"v1.4.6\",\"assets\":[{\"name\":\"ScheduleTranslate-Online-1.4.6.zip\"}]},\n {\"draft\":false,\"tag_name\":\"v1.4.5\",\"assets\":[{\"name\":\"ScheduleTranslate-Offline-1.4.5.zip\"}]},\n {\"draft\":true,\"tag_name\":\"v9.0.0\",\"assets\":[{\"name\":\"ScheduleTranslate-Online-9.0.0.zip\"}]},\n {\"draft\":false,\"tag_name\":\"garbage\",\"assets\":[]}]\n";
+Assert(UpdateChecker.FindNewer(releases,new Version("1.4.4"),"Online")==new Version("1.4.6"),"Published preview not detected");
+Assert(UpdateChecker.FindNewer(releases,new Version("1.4.4"),"Offline")==new Version("1.4.5"),"Wrong variant detected");
+Assert(UpdateChecker.FindNewer(releases,new Version("1.4.6"),"Online")==null,"Equal/older version notified");
+Assert(UpdateChecker.FindNewer("[]",new Version("1.4.4"),"Online")==null,"Empty list notified");
+var updateFixture=Path.Combine(Path.GetTempPath(),"schedule-updates-"+Guid.NewGuid());
+try
+{
+    Assert(!UpdateSettings.Load(updateFixture,false).CheckForUpdates,"Offline unexpectedly contacts network");
+    File.WriteAllText(Path.Combine(updateFixture,"updates.json"),"{\"CheckForUpdates\":true}");
+    Assert(UpdateSettings.Load(updateFixture,false).CheckForUpdates,"Opt-in ignored");
+}
+finally { File.Delete(Path.Combine(updateFixture,"updates.json")); Directory.Delete(updateFixture); }
+if(args.Contains("--updates-live"))
+{
+    var latest=await UpdateChecker.CheckAsync(new Version("0.0.0"),"Online");
+    Assert(latest!=null,"Live GitHub check found no usable release");
+    Console.WriteLine("Live GitHub update check passed: "+latest);
+}
+Console.WriteLine("Update checks: preview, draft exclusion, variant, equal/older versions, empty list and offline opt-in passed.");
 const string disclaimerSource="TVGS does not condone the manufacturing, trade, or use of illegal drugs.";
 const string disclaimerSpanish="Aviso del juego en español.";
 Assert(SupportMessage.Append(disclaimerSource,disclaimerSpanish,"")==disclaimerSpanish,"Unset profile shows an invented link");
@@ -21,7 +87,8 @@ TranslationEngine Load(string mode)
     using var reader=new StreamReader(gzip);
     var result=new TranslationEngine(); result.Load(reader);
     bool http=assembly.GetReferencedAssemblies().Any(r=>r.Name=="System.Net.Http");
-    Assert(http==(mode=="Online"),"HTTP dependency in wrong variant");
+    Assert(http,"Optional update checker HTTP dependency missing");
+    Assert((assembly.GetType("ScheduleISpanish.OnlineTranslator")!=null)==(mode=="Online"),"Online translator included in wrong variant");
     return result;
 }
 var offline=Load("Offline"); var onlineEngine=Load("Online");

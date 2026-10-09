@@ -16,7 +16,7 @@ Traducción de **Schedule I (IL2CPP)**: español sin conexión o traducción aut
 
 | Versión | Qué ofrece | Conexión | Archivo |
 | --- | --- | --- | --- |
-| **Offline** | 11.762 entradas integradas en español | No necesita internet | `ScheduleISpanish.dll` |
+| **Offline** | 12.295 entradas integradas en español | No necesita internet | `ScheduleISpanish.dll` |
 | **Online** | Diccionario español y traducción automática de textos nuevos; idioma configurable | Necesaria para traducir textos nuevos | `ScheduleTranslate.dll` |
 
 En Online, los textos se traducen conforme aparecen en el juego. En español se aprovecha el diccionario integrado; los otros idiomas parten del texto inglés. Las traducciones obtenidas se guardan en una caché por idioma y se reutilizan en futuras partidas.
@@ -111,7 +111,7 @@ Translation for **Schedule I (IL2CPP)** using **MelonLoader**, with offline Span
 
 | Version | Features | Connection | File |
 | --- | --- | --- | --- |
-| **Offline** | 11,762 embedded Spanish entries | Not required | `ScheduleISpanish.dll` |
+| **Offline** | 12,295 embedded Spanish entries | Not required | `ScheduleISpanish.dll` |
 | **Online** | Spanish dictionary, translation of new text and configurable target language | Required for new translations | `ScheduleTranslate.dll` |
 
 Online translates labels as they appear. Spanish uses the embedded dictionary; other languages start from the English text. Results are saved in a separate cache for each language and reused across sessions.
@@ -175,3 +175,17 @@ Source and tests: [source branch](https://github.com/SasoIkuyo/schedule-i-transl
 | [1.3.2](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.3.2) | Filtro de FPS, reintentos de consultas y traducción de patinetas con precios. | FPS filtering, request retries and priced skateboard labels. |
 | [1.3.1](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.3.1) | Distribución del menú de partidas, tiempo restante y mensajes dinámicos del teléfono. | Save menu layout, remaining time and dynamic phone messages. |
 | [1.3.0](https://github.com/SasoIkuyo/schedule-i-translate/releases/tag/v1.3.0) | Bloques de misiones, diálogos variables y correcciones de cultivo y nombres. | Mission blocks, variable dialogue and cultivation/name corrections. |
+
+
+## Aviso de actualizaciones / Update notifications (1.4.5)
+
+Al iniciar, Online consulta las publicaciones de GitHub en segundo plano y muestra un aviso si hay una versi?n superior con ZIP para la variante instalada, incluidas las versiones preliminares publicadas. Permite abrir las descargas o cerrar el aviso. No instala actualizaciones autom?ticamente. Si falla la conexi?n, el juego contin?a normalmente.
+
+`UserData/ScheduleISpanish/updates.json`: `CheckForUpdates` es `true` por defecto en Online y `false` en Offline. Offline sigue traduciendo sin conexi?n; activar esta opci?n habilita una consulta de actualizaciones al iniciar. `PreviewNotification: true` muestra un aviso de prueba sin necesitar una versi?n nueva; vuelve a `false` despu?s de probar.
+
+Online checks GitHub releases in the background at startup and displays a dismissible notice when a newer version has a ZIP for the installed variant, including published previews. The download button opens the releases page. Updates are installed manually. Network failures do not stop translation. Set `CheckForUpdates` in `UserData/ScheduleISpanish/updates.json` to enable or disable checking (Online default: true; Offline default: false). `PreviewNotification: true` displays a test notice; restore false after testing.
+
+
+## 1.4.5
+
+533 traducciones adicionales integradas (12.295 entradas) y aviso opcional de nuevas versiones. / 533 additional embedded Spanish translations (12,295 entries) and update notifications.

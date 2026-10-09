@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.IO.Compression;
 
 #if ONLINE
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.4.4","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.4.5","Saso")]
 #else
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.4.4","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.4.5","Saso")]
 #endif
 [assembly: MelonGame("TVGS","Schedule I")]
 
@@ -18,6 +18,9 @@ namespace ScheduleISpanish;
 
 public sealed class SpanishMod : MelonMod
 {
+    private Task<Version?>? updateCheck;
+    private string? availableVersion;
+    private bool updateDismissed;
     private static TranslationEngine? engine;
     [ThreadStatic] private static bool replacing;
     private static int errors;
@@ -54,6 +57,21 @@ public sealed class SpanishMod : MelonMod
             try { targetLanguage=LanguageSettings.Load(parent).TargetLanguage; }
             catch(Exception ex) { LoggerInstance.Warning("language.json: "+ex.Message+" Using es."); }
 #endif
+            try
+            {
+#if ONLINE
+                const bool defaultUpdates=true;
+                const string variant="Online";
+#else
+                const bool defaultUpdates=false;
+                const string variant="Offline";
+#endif
+                var updates=UpdateSettings.Load(parent,defaultUpdates);
+                if(updates.PreviewNotification) availableVersion="PRUEBA / TEST";
+                if(updates.CheckForUpdates)
+                    updateCheck=Task.Run(()=>UpdateChecker.CheckAsync(typeof(SpanishMod).Assembly.GetName().Version!,variant));
+            }
+            catch(Exception ex) { LoggerInstance.Warning("updates.json: "+ex.Message); }
             engine=new TranslationEngine(); engine.Load(reader,identitiesOnly:targetLanguage!="es");
 #if ONLINE
             if(targetLanguage!="en") online=new OnlineTranslator(engine,parent,targetLanguage:targetLanguage);
@@ -105,7 +123,7 @@ public sealed class SpanishMod : MelonMod
 #if ONLINE
             LoggerInstance.Msg("Modo online: solo frases nuevas, cola limitada y cache persistente. Servicio: Google.");
 #else
-            LoggerInstance.Msg("Modo offline: sin consultas de red.");
+            LoggerInstance.Msg("Modo offline: traduccion sin conexion; comprobacion de actualizaciones opcional.");
 #endif
         }
         catch(Exception ex) { LoggerInstance.Error("No se pudo iniciar la traduccion local: "+ex); engine=null; }
@@ -252,9 +270,31 @@ public sealed class SpanishMod : MelonMod
 #endif
     }
 
-#if ONLINE
+    public override void OnGUI()
+    {
+        if(availableVersion==null || updateDismissed) return;
+        float width=Math.Min(460,UnityEngine.Screen.width-20);
+        float x=(UnityEngine.Screen.width-width)/2;
+        UnityEngine.GUI.Box(new UnityEngine.Rect(x,20,width,110),"Schedule I Translate - Nueva version: "+availableVersion);
+        UnityEngine.GUI.Label(new UnityEngine.Rect(x+15,48,width-30,25),"Hay una actualizacion disponible en GitHub.");
+        if(UnityEngine.GUI.Button(new UnityEngine.Rect(x+15,85,width-130,30),"Abrir descargas"))
+            UnityEngine.Application.OpenURL(UpdateChecker.ReleasesUrl);
+        if(UnityEngine.GUI.Button(new UnityEngine.Rect(x+width-105,85,90,30),"Cerrar")) updateDismissed=true;
+    }
+
     public override void OnUpdate()
     {
+        if(updateCheck is { IsCompleted:true })
+        {
+            var completed=updateCheck; updateCheck=null;
+            if(completed.IsCompletedSuccessfully && completed.Result is Version version)
+            {
+                availableVersion=version.ToString();
+                LoggerInstance.Msg("Nueva version disponible: "+version+" - "+UpdateChecker.ReleasesUrl);
+            }
+            else if(completed.IsFaulted) LoggerInstance.Warning("No se pudo comprobar actualizaciones: "+completed.Exception?.GetBaseException().Message);
+        }
+#if ONLINE
         if(online==null) return;
         if(DateTime.UtcNow>=nextRetry)
         {
@@ -287,8 +327,10 @@ public sealed class SpanishMod : MelonMod
                 finally { replacing=false; }
             }
         }
+#endif
     }
 
+#if ONLINE
     private static bool StillWaiting(object target,string source)
     {
         try
