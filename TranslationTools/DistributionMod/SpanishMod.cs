@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.IO.Compression;
 
 #if ONLINE
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.4.1","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.4.2","Saso")]
 #else
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.4.1","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.4.2","Saso")]
 #endif
 [assembly: MelonGame("TVGS","Schedule I")]
 
@@ -71,7 +71,7 @@ public sealed class SpanishMod : MelonMod
                 var parameters=method.GetParameters();
                 if((method.Name=="set_text" || method.Name=="SetText") && parameters.Length>0 && parameters[0].ParameterType==typeof(string))
                 {
-                    try { patcher.Patch(method,prefix:prefix); hooks++; }
+                    try { patcher.Patch(method,prefix:prefix,postfix:type==typeof(Text) && method.Name=="set_text" ? new HarmonyMethod(typeof(PhoneText).GetMethod(nameof(PhoneText.TextChanged),BindingFlags.Static|BindingFlags.NonPublic)) : null); hooks++; }
                     catch(Exception ex) { LoggerInstance.Warning("No se pudo interceptar "+type.Name+"."+method.Name+": "+ex.Message); }
                 }
             }

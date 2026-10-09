@@ -17,9 +17,16 @@ internal static class PhoneText
     internal static bool IsPhone(Text label)
     {
         if(label.canvas==null || label.canvas.renderMode!=RenderMode.WorldSpace) return false;
+        // Editable fields need the original glyph/caret geometry maintained by InputField.
+        if(label.GetComponentInParent<InputField>()!=null) return false;
         var parent=label.transform;
         for(int i=0;i<20 && parent!=null;i++,parent=parent.parent)
+        {
+            // Keep the counteroffer's amount selectors and product preview native.
+            // Their widths, editing and immediate refresh are controlled by the game.
+            if(parent.name=="CounterofferInterface") return false;
             if(parent.name=="AppsCanvas") return true;
+        }
         return false;
     }
 
@@ -65,6 +72,19 @@ internal static class PhoneText
             if(mirror.isActiveAndEnabled) __0.Clear();
         }
         catch(Exception ex) { if(errors++<3) MelonLoader.MelonLogger.Warning("Phone text: "+ex.Message); }
+    }
+
+    internal static void TextChanged(Text __instance)
+    {
+        if(!Enabled) return;
+        try
+        {
+            // Run after Text.text has committed the new value, before canvas rebuilding.
+            // Numeric fields are just as important as translated labels here.
+            if(mirrors.TryGetValue(__instance.GetInstanceID(),out var mirror) && mirror!=null)
+                Sync(__instance,mirror);
+        }
+        catch(Exception ex) { if(errors++<3) MelonLoader.MelonLogger.Warning("Phone value update: "+ex.Message); }
     }
 
     internal static void Disable(Text __instance)
