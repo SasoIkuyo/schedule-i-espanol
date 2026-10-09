@@ -83,6 +83,12 @@ Offroad Skateboard=Patineta todoterreno
 Wicked sick my man, which board are you looking for?=¡Genial, amigo! ¿Qué patineta estás buscando?
 
 # Phone supplier orders: concise labels and contextual terminology.
+WAITING FOR <NAME>=Esperando a <NAME>
+Waiting for <NAME>=Esperando a <NAME>
+Select a destination=Selecciona un destino
+[Complete Deal]=[Completar venta]
+Dan's Hardware=Ferretería de Dan
+behind Dan's Hardware=detrás de la ferretería de Dan
 Counter-offer=Contraoferta
 [Counter-offer]=[Contraoferta]
 Yep=Sí

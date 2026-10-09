@@ -25,6 +25,9 @@ TranslationEngine Load(string mode)
     return result;
 }
 var offline=Load("Offline"); var onlineEngine=Load("Online");
+Assert(offline.Translate("WAITING FOR BENJI COLEMAN")=="Esperando a BENJI COLEMAN","Waiting requirement/NPC name");
+Assert(offline.Translate("Select a destination")=="Selecciona un destino","Delivery destination prompt");
+Assert(offline.Translate("[Complete Deal]")=="[Completar venta]","Drug deal context");
 Assert(offline.Translate("Counter-offer")=="Contraoferta" && offline.Translate("[Counter-offer]")=="[Contraoferta]","Phone counteroffer button/title");
 Assert(offline.Translate("Yep")=="Sí","Phone acceptance button");
 Assert(offline.Translate("Can I interest you in a free sample?")=="¿Quieres una muestra gratis?","Short sample option");
