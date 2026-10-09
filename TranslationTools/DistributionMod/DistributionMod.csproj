@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework><AssemblyName>ScheduleISpanish</AssemblyName>
-    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
     <GameRoot Condition="'$(GameRoot)'==''">../..</GameRoot>
-    <Version>1.2.0</Version><Authors>Saso</Authors><Company>Saso</Company>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <Version>1.3.0</Version><Authors>Saso</Authors><Company>Saso</Company>
     <DebugType>none</DebugType><DebugSymbols>false</DebugSymbols><Deterministic>true</Deterministic>
     <ModMode Condition="'$(ModMode)'==''">Offline</ModMode>
+    <AssemblyName Condition="'$(ModMode)'=='Online'">ScheduleTranslate</AssemblyName>
     <BaseOutputPath>bin/$(ModMode)/</BaseOutputPath>
     <DefineConstants Condition="'$(ModMode)'=='Online'">$(DefineConstants);ONLINE</DefineConstants>
   </PropertyGroup>
@@ -17,6 +18,8 @@
     <Reference Include="Il2Cppmscorlib"><HintPath>$(GameRoot)/MelonLoader/Il2CppAssemblies/Il2Cppmscorlib.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameRoot)/MelonLoader/Il2CppAssemblies/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UI"><HintPath>$(GameRoot)/MelonLoader/Il2CppAssemblies/UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(GameRoot)/MelonLoader/Il2CppAssemblies/UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UIModule"><HintPath>$(GameRoot)/MelonLoader/Il2CppAssemblies/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.TextMeshPro"><HintPath>$(GameRoot)/MelonLoader/Il2CppAssemblies/Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup Condition="'$(ModMode)'!='Online'"><Compile Remove="OnlineTranslator.cs" /></ItemGroup>

@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.IO.Compression;
 
 #if ONLINE
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Online","1.2.0","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Translate Online","1.3.0","Saso")]
 #else
-[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.2.0","Saso")]
+[assembly: MelonInfo(typeof(ScheduleISpanish.SpanishMod),"Schedule I Spanish Offline","1.3.0","Saso")]
 #endif
 [assembly: MelonGame("TVGS","Schedule I")]
 
@@ -22,6 +22,9 @@ public sealed class SpanishMod : MelonMod
     [ThreadStatic] private static bool replacing;
     private static int errors;
     private static string targetLanguage="es";
+    private static int phoneTextScale=1;
+    private static TMP_Text? dialogueTarget;
+    private static string dialogueSource="",dialogueTranslation="";
     private static StreamWriter? capture;
     private static readonly HashSet<string> missing = new(StringComparer.Ordinal);
 #if ONLINE
@@ -32,10 +35,19 @@ public sealed class SpanishMod : MelonMod
     {
         try
         {
+#if ONLINE
+            if(AppDomain.CurrentDomain.GetAssemblies().Any(a=>a.GetName().Name=="ScheduleISpanish"))
+            {
+                LoggerInstance.Warning("Both translation variants are installed. Online disabled; remove ScheduleISpanish.dll to use ScheduleTranslate.dll.");
+                return;
+            }
+#endif
             using var resource=typeof(SpanishMod).Assembly.GetManifestResourceStream("ScheduleISpanish.Dictionary.gz") ?? throw new InvalidDataException("Diccionario integrado ausente");
             using var decompressed=new GZipStream(resource,CompressionMode.Decompress);
             using var reader=new StreamReader(decompressed,System.Text.Encoding.UTF8);
             string parent=Path.Combine(MelonEnvironment.GameRootDirectory,"UserData","ScheduleISpanish");
+            try { phoneTextScale=DisplaySettings.Load(parent).PhoneTextScale; }
+            catch(Exception ex) { LoggerInstance.Warning("display.json: "+ex.Message+" Using original phone text scale."); }
 #if ONLINE
             try { targetLanguage=LanguageSettings.Load(parent).TargetLanguage; }
             catch(Exception ex) { LoggerInstance.Warning("language.json: "+ex.Message+" Using es."); }
@@ -64,6 +76,18 @@ public sealed class SpanishMod : MelonMod
             HookEnable(patcher,typeof(Text),nameof(EnableUGUI));
             HookEnable(patcher,typeof(TextMeshProUGUI),nameof(EnableTMP));
             HookEnable(patcher,typeof(TextMeshPro),nameof(EnableTMP));
+            try
+            {
+                var dialogueType=AccessTools.TypeByName("Il2CppScheduleOne.UI.DialogueCanvas");
+                var rollout=dialogueType==null ? null : AccessTools.DeclaredMethod(dialogueType,"RolloutDialogue");
+                if(rollout!=null) patcher.Patch(rollout,prefix:new HarmonyMethod(typeof(SpanishMod).GetMethod(nameof(DialoguePrefix),BindingFlags.Static|BindingFlags.NonPublic)));
+            }
+            catch(Exception ex) { LoggerInstance.Warning("Dialogue rollout: "+ex.Message); }
+            if(phoneTextScale>1)
+            {
+                try { patcher.Patch(AccessTools.PropertyGetter(typeof(Text),"pixelsPerUnit"),postfix:new HarmonyMethod(typeof(SpanishMod).GetMethod(nameof(PhonePixels),BindingFlags.Static|BindingFlags.NonPublic))); }
+                catch(Exception ex) { LoggerInstance.Warning("Phone text clarity: "+ex.Message); }
+            }
             LoggerInstance.Msg($"Diccionario integrado: {engine.EntryCount} textos, {engine.RuleCount} patrones, {engine.NumericCount} plantillas numericas. {hooks} setters.");
 #if ONLINE
             LoggerInstance.Msg("Modo online: solo frases nuevas, cola limitada y cache persistente. Servicio: Google.");
@@ -84,10 +108,40 @@ public sealed class SpanishMod : MelonMod
         catch(Exception ex) { MelonLogger.Warning("No se pudo interceptar OnEnable de "+type.Name+": "+ex.Message); }
     }
 
+    private static void PhonePixels(Text __instance,ref float __result)
+    {
+        try
+        {
+            if(phoneTextScale<=1 || __instance.font==null || !__instance.font.dynamic || __instance.canvas==null || __instance.canvas.renderMode!=UnityEngine.RenderMode.WorldSpace) return;
+            // A higher rasterization density with reciprocal vertex scaling preserves layout.
+            // Restrict this to the inspected phone hierarchy; no camera or scene resolution changes.
+            var parent=__instance.transform;
+            for(int i=0;i<16 && parent!=null;i++,parent=parent.parent)
+                if(parent.name=="AppsCanvas") { __result*=phoneTextScale; return; }
+        }
+        catch(Exception ex) { Warn(ex); }
+    }
+
     private static void TextPrefix(object __instance,ref string __0)
     {
         if(engine==null || replacing || string.IsNullOrEmpty(__0)) return;
+        if(dialogueTarget!=null && __instance is TMP_Text tmp && tmp.GetInstanceID()==dialogueTarget.GetInstanceID() && __0!=dialogueSource && __0!=dialogueTranslation) return;
         try { string original=__0; __0=Render(original,engine.Translate(__0)); Capture(original,__0); Track(__instance,original,__0); }
+        catch(Exception ex) { Warn(ex); }
+    }
+
+    private static void DialoguePrefix(object __instance,ref string __0)
+    {
+        if(engine==null || string.IsNullOrEmpty(__0)) return;
+        try
+        {
+            dialogueTarget=AccessTools.Property(__instance.GetType(),"dialogueText")?.GetValue(__instance) as TMP_Text;
+            dialogueSource=__0;
+            __0=Render(dialogueSource,engine.Translate(dialogueSource));
+            dialogueTranslation=__0;
+            Capture(dialogueSource,__0);
+            if(dialogueTarget!=null) Track(dialogueTarget,dialogueSource,__0);
+        }
         catch(Exception ex) { Warn(ex); }
     }
 
@@ -169,6 +223,7 @@ public sealed class SpanishMod : MelonMod
     public override void OnDeinitializeMelon()
     {
         capture?.Dispose(); capture=null;
+        dialogueTarget=null;
 #if ONLINE
         online?.Dispose(); online=null; waiting.Clear();
 #endif
