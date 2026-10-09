@@ -2,7 +2,7 @@
 
 **Source branch:** [Build instructions](BUILD.md) | [Download compiled mod](https://github.com/SasoIkuyo/schedule-i-translate/releases)
 
-Traducción de **Schedule I (IL2CPP)**: español sin conexión o traducción automática a otros idiomas mientras juegas. Funciona con **MelonLoader**.
+Traducción de **Schedule I (IL2CPP)**: español sin conexión o traducción automática a otros idiomas mientras juegas. Funciona con **[MelonLoader](https://github.com/LavaGang/MelonLoader/releases)**.
 
 **[Descargar](https://github.com/SasoIkuyo/schedule-i-translate/releases)** · [Código fuente](https://github.com/SasoIkuyo/schedule-i-translate/tree/source) · [Reportar un problema](https://github.com/SasoIkuyo/schedule-i-translate/issues) · [Apoyar el proyecto ☕](https://buymeacoffee.com/sasoikuyo)
 
@@ -23,7 +23,7 @@ En Online, los textos se traducen conforme aparecen en el juego. En español se 
 
 ### Instalación
 
-Necesitas **Schedule I (IL2CPP)** y **MelonLoader** instalado. La compatibilidad con nuevas actualizaciones del juego debe comprobarse.
+Necesitas **Schedule I (IL2CPP)** y **[MelonLoader](https://github.com/LavaGang/MelonLoader/releases)** instalado. La compatibilidad con nuevas actualizaciones del juego debe comprobarse.
 
 1. Cierra el juego.
 2. Descarga **un solo ZIP**, Online u Offline, desde [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
@@ -105,7 +105,7 @@ Si te sirve la traducción, puedes apoyar su desarrollo en [Buy Me a Coffee](htt
 
 ## English
 
-Translation for **Schedule I (IL2CPP)** using **MelonLoader**, with offline Spanish and automatic translation into configurable languages while you play.
+Translation for **Schedule I (IL2CPP)** using **[MelonLoader](https://github.com/LavaGang/MelonLoader/releases)**, with offline Spanish and automatic translation into configurable languages while you play.
 
 ### Choose a version
 
@@ -118,7 +118,7 @@ Online translates labels as they appear. Spanish uses the embedded dictionary; o
 
 ### Installation and updates
 
-1. Install **MelonLoader** for your IL2CPP game installation.
+1. Install **[MelonLoader](https://github.com/LavaGang/MelonLoader/releases)** for your IL2CPP game installation.
 2. Close the game and download **one ZIP** from [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
 3. Remove other active translation DLLs and the previous version of this mod.
 4. Extract the ZIP and copy its `Mods` folder next to `Schedule I.exe`.
