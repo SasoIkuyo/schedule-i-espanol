@@ -1,6 +1,6 @@
 # Schedule I Translate
 
-Traducción para **Schedule I 0.4.6f13 (IL2CPP)**, con una versión offline en español y una versión online con idioma configurable.
+Traducción para **Schedule I (IL2CPP)**, con una versión offline en español y una versión online con idioma configurable.
 
 [Descargar versiones](https://github.com/SasoIkuyo/schedule-i-translate/releases) · [Apoyar el desarrollo ☕](https://buymeacoffee.com/sasoikuyo)
 
@@ -9,6 +9,8 @@ Traducción para **Schedule I 0.4.6f13 (IL2CPP)**, con una versión offline en e
 ## Español
 
 ### Requisitos y versiones
+
+La versión 0.4.6f13 se usó como referencia de compilación. No es una restricción a esa versión; la compatibilidad con otras actualizaciones debe comprobarse.
 
 - **MelonLoader 0.7.3**, instalado y compatible con tu juego.
 - **Offline:** 11.465 entradas integradas en español; funciona sin consultas de red.
@@ -70,7 +72,7 @@ Si te sirve el mod, puedes apoyar su desarrollo en [Buy Me a Coffee](https://buy
 
 ### Requirements and installation
 
-Built for **Schedule I 0.4.6f13 (IL2CPP)**. Requires compatible **MelonLoader 0.7.3**, installed separately.
+Translation for **Schedule I (IL2CPP)**. Requires compatible **MelonLoader 0.7.3**, installed separately. Version 0.4.6f13 was used as the build reference; compatibility with other updates needs verification.
 
 1. Close the game and download **one ZIP** from [Releases](https://github.com/SasoIkuyo/schedule-i-translate/releases).
 2. Remove other active translation mods to avoid conflicts.
@@ -102,3 +104,9 @@ Translations are automated with local corrections. Dynamic text and text inside 
 Report problems through [Issues](https://github.com/SasoIkuyo/schedule-i-translate/issues), including your game version, mod variant, language, affected text or screenshot, and `MelonLoader/Latest.log` for crashes. Remove personal information from logs before sharing them.
 
 [Support development on Buy Me a Coffee ☕](https://buymeacoffee.com/sasoikuyo)
+
+## Código fuente / Source code
+
+El código del mod y sus pruebas están en la rama [source](https://github.com/SasoIkuyo/schedule-i-translate/tree/source), con instrucciones de compilación.
+
+The mod source and tests are available on the [source branch](https://github.com/SasoIkuyo/schedule-i-translate/tree/source), with build instructions.
